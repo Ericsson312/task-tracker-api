@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TaskTrackerApi.Domain
+namespace TaskTrackerApi.Contracts.V1.Requiests
 {
-    public class TaskToDo
+    public class UpdateTaskRequest
     {
-        public Guid Id { get; set; }
         public string TaskName { get; set; }
     }
 }
