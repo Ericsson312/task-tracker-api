@@ -57,5 +57,17 @@ namespace TaskTrackerApi.Services
 
             return deleted > 0;
         }
+
+        public async Task<bool> UserOwnsTaskToDoAsync(Guid taskId, string UserId)
+        {
+            var taskToDo = await _dataContext.TasksToDo.AsNoTracking().SingleOrDefaultAsync(x => x.Id == taskId && x.UserId == UserId);
+
+            if (taskToDo == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

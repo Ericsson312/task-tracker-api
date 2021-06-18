@@ -13,5 +13,6 @@ namespace TaskTrackerApi.Services
         Task<bool> CreateTaskAsync(TaskToDo taskToDo);
         Task<bool> UpdateTaskAsync(TaskToDo taskToUpdate);
         Task<bool> DeleteTaskAsync(Guid taskId);
+        Task<bool> UserOwnsTaskToDoAsync(Guid taskId, string UserId);
     }
 }

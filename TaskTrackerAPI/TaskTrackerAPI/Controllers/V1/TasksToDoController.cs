@@ -9,6 +9,7 @@ using TaskTrackerApi.Contracts;
 using TaskTrackerApi.Contracts.V1.Requiests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Domain;
+using TaskTrackerApi.Extensions;
 using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Controllers
@@ -44,11 +45,15 @@ namespace TaskTrackerApi.Controllers
         [HttpPut(ApiRoutes.Tasks.Update)]
         public async Task<IActionResult> UpdateAsync([FromRoute] Guid taskId, [FromBody] UpdateTaskToDoRequest taskRequest)
         {
-            var taskToUpdate = new TaskToDo()
+            var userOwnsTaskToDo = await _taskService.UserOwnsTaskToDoAsync(taskId, HttpContext.GetUserId());
+
+            if (!userOwnsTaskToDo)
             {
-                Id = taskId,
-                Name = taskRequest.Name
-            };
+                return BadRequest(new { error = "You do not own this task" });
+            }
+
+            var taskToUpdate = await _taskService.GetTaskByIdAsync(taskId);
+            taskToUpdate.Name = taskRequest.Name;
 
             var updated = await _taskService.UpdateTaskAsync(taskToUpdate);
 
@@ -63,7 +68,11 @@ namespace TaskTrackerApi.Controllers
         [HttpPost(ApiRoutes.Tasks.Create)]
         public async Task<IActionResult> CreateAsync([FromBody] CreateTaskToDoRequest taskRequest)
         {
-            var taskToDo = new TaskToDo { Name = taskRequest.Name };
+            var taskToDo = new TaskToDo
+            {
+                Name = taskRequest.Name,
+                UserId = HttpContext.GetUserId()
+            };
 
             await _taskService.CreateTaskAsync(taskToDo);
 
@@ -78,6 +87,13 @@ namespace TaskTrackerApi.Controllers
         [HttpDelete(ApiRoutes.Tasks.Delete)]
         public async Task<IActionResult> DeleteAsync([FromRoute] Guid taskId)
         {
+            var userOwnsTaskToDo = await _taskService.UserOwnsTaskToDoAsync(taskId, HttpContext.GetUserId());
+
+            if (!userOwnsTaskToDo)
+            {
+                return BadRequest(new { error = "You do not own this task" });
+            }
+
             var deleted = await _taskService.DeleteTaskAsync(taskId);
 
             if (deleted)
