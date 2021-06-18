@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace TaskTrackerApi.Contracts.V1.Requiests
 {
-    public class UpdateTaskRequest
+    public class UpdateTaskToDoRequest
     {
-        public string TaskName { get; set; }
+        public string Name { get; set; }
     }
 }

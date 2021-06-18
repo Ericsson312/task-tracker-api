@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 
 namespace TaskTrackerApi.Contracts.V1.Requiests
 {
-    public class CreateTaskRequest
+    public class CreateTaskToDoRequest
     {
-        public Guid Id { get; set; }
-        public string TaskName { get; set; }
+        public string Name { get; set; }
     }
 }

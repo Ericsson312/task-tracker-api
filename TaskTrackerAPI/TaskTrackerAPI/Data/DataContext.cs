@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TaskTrackerApi.Domain;
 
 namespace TaskTrackerApi.Data
 {
@@ -12,5 +13,7 @@ namespace TaskTrackerApi.Data
             : base(options)
         {
         }
+
+        public DbSet<TaskToDo> TasksToDo { get; set; }
     }
 }

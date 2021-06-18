@@ -15,7 +15,7 @@ namespace TaskTrackerApi.Installers
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>().AddEntityFrameworkStores<DataContext>();
 
-            services.AddSingleton<ITaskService, TaskService>();
+            services.AddScoped<ITaskToDoService, TaskToDoService>();
         }
     }
 }

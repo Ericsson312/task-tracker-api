@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TaskTrackerApi.Contracts.V1.Responses
+namespace TaskTrackerApi.Options
 {
-    public class TaskResponse
+    public class JwtOptions
     {
-        public Guid Id { get; set; }
+        public string Secret { get; set; }
     }
 }
