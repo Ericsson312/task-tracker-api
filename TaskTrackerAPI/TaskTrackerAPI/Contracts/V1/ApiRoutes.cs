@@ -10,6 +10,7 @@ namespace TaskTrackerApi.Contracts
         public const string Root = "api";
         public const string Version = "v1";
         public const string Base = Root + "/" + Version;
+
         public static class Tasks
         {
             public const string GetAll = Base + "/tasks";
@@ -17,6 +18,12 @@ namespace TaskTrackerApi.Contracts
             public const string Update = Base + "/tasks/{taskId}";
             public const string Delete = Base + "/tasks/{taskId}";
             public const string Create = Base + "/tasks";
+        }
+
+        public static class Identity
+        {
+            public const string Login = Base + "/identity/login";
+            public const string Register = Base + "/identity/register";
         }
     }
 }

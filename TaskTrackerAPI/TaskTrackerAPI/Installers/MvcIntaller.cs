@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TaskTrackerApi.Options;
+using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Installers
 {
@@ -20,6 +21,8 @@ namespace TaskTrackerApi.Installers
             var jwtOptions = new JwtOptions();
             configuration.Bind(nameof(jwtOptions), jwtOptions);
             services.AddSingleton(jwtOptions);
+
+            services.AddScoped<IIdentityService, IdentityService>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
