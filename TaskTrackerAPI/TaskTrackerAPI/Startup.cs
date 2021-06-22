@@ -61,7 +61,6 @@ namespace TaskTrackerApi
             app.UseSwaggerUI(option =>
             {
                 option.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOptions.Description);
-                //option.RoutePrefix = String.Empty;
             });
 
             app.UseMvc();

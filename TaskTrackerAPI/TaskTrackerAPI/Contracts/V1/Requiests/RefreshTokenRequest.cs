@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TaskTrackerApi.Domain
+namespace TaskTrackerApi.Contracts.V1.Requiests
 {
-    public class AuthenticationResult
+    public class RefreshTokenRequest
     {
         public string Token { get; set; }
         public string RefreshToken { get; set; }
-        public bool Success { get; set; }
-        public IEnumerable<string> Errors { get; set; }
     }
 }

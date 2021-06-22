@@ -15,5 +15,6 @@ namespace TaskTrackerApi.Data
         }
 
         public DbSet<TaskToDo> TasksToDo { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }
