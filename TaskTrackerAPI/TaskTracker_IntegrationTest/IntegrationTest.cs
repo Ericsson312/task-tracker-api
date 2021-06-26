@@ -18,9 +18,10 @@ using TaskTrackerApi.Domain;
 
 namespace TaskTracker_IntegrationTest
 {
-    public class IntegrationTest
+    public class IntegrationTest : IDisposable
     {
         protected readonly HttpClient _testClient;
+        protected readonly IServiceProvider _serviceProvider;
 
         protected IntegrationTest()
         {
@@ -36,6 +37,7 @@ namespace TaskTracker_IntegrationTest
                         });
                     });
                 });
+            _serviceProvider = appFactory.Services;
             _testClient = appFactory.CreateClient();
         }
 
@@ -50,12 +52,6 @@ namespace TaskTracker_IntegrationTest
             return await response.Content.ReadAsAsync<TaskToDoResponse>();
         }
 
-        protected async Task<TaskToDo> UpdateAsync(Guid taskId, UpdateTaskToDoRequest request)
-        {
-            var response = await _testClient.PutAsJsonAsync(ApiRoutes.Tasks.Update.Replace("{taskId}", taskId.ToString()), request);
-            return await response.Content.ReadAsAsync<TaskToDo>();
-        }
-
         private async Task<string> GetJwtAsync()
         {
             var response = await _testClient.PostAsJsonAsync(ApiRoutes.Identity.Register, new UserRegistrationRequest
@@ -67,6 +63,13 @@ namespace TaskTracker_IntegrationTest
             var registrationResponse = await response.Content.ReadAsAsync<AuthSuccessResponse>();
 
             return registrationResponse.Token;
+        }
+
+        public void Dispose()
+        {
+            using var serviceScope = _serviceProvider.CreateScope();
+            var context = serviceScope.ServiceProvider.GetService<DataContext>();
+            context.Database.EnsureDeleted();
         }
     }
 }

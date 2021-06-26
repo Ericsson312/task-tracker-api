@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,7 @@ namespace TaskTrackerApi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             // uncoment this code when you want to perform a database migration inside docker container
             //using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
@@ -56,7 +57,10 @@ namespace TaskTrackerApi
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseRouting();
+
             app.UseAuthentication();
+            app.UseAuthorization();
 
             var swaggerOptions = new SwaggerOptions();
             Configuration.GetSection(nameof(SwaggerOptions)).Bind(swaggerOptions);
@@ -71,7 +75,15 @@ namespace TaskTrackerApi
                 option.SwaggerEndpoint(swaggerOptions.UIEndpoint, swaggerOptions.Description);
             });
 
-            app.UseMvc();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapGet("/", context =>
+                {
+                    context.Response.Redirect("/swagger/");
+                    return Task.CompletedTask;
+                });
+                endpoints.MapControllers();
+            });
         }
     }
 }
