@@ -19,7 +19,9 @@ namespace TaskTrackerApi.Services
 
         public async Task<TaskToDo> GetTaskByIdAsync(Guid taskId)
         {
-            return await _dataContext.TasksToDo.SingleOrDefaultAsync(x => x.Id == taskId);
+            return await _dataContext.TasksToDo
+                .Include(x => x.Tags)
+                .SingleOrDefaultAsync(x => x.Id == taskId);
         }
 
         public async Task<List<TaskToDo>> GetTasksAsync()
@@ -29,6 +31,10 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> CreateTaskAsync(TaskToDo taskToDo)
         {
+            taskToDo.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
+
+            await AddNewTag(taskToDo);
+
             await _dataContext.TasksToDo.AddAsync(taskToDo);
             var created = await _dataContext.SaveChangesAsync();
 
@@ -60,7 +66,9 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> UserOwnsTaskToDoAsync(Guid taskId, string UserId)
         {
-            var taskToDo = await _dataContext.TasksToDo.AsNoTracking().SingleOrDefaultAsync(x => x.Id == taskId && x.UserId == UserId);
+            var taskToDo = await _dataContext.TasksToDo
+                .AsNoTracking()
+                .SingleOrDefaultAsync(x => x.Id == taskId && x.UserId == UserId);
 
             if (taskToDo == null)
             {
@@ -68,6 +76,26 @@ namespace TaskTrackerApi.Services
             }
 
             return true;
+        }
+
+        public async Task<List<Tag>> GetTagsAsync()
+        {
+            return await _dataContext.Tags.ToListAsync();
+        }
+
+        private async Task AddNewTag(TaskToDo taskToDo)
+        {
+            foreach (var tag in taskToDo.Tags)
+            {
+                var tagExist = await _dataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tag.TagName);
+
+                if (tagExist != null)
+                {
+                    continue;
+                }
+
+                await _dataContext.Tags.AddAsync(new Tag { Name = tag.TagName, CreatedOn = DateTime.UtcNow, CreatorId = taskToDo.UserId });
+            }
         }
     }
 }
