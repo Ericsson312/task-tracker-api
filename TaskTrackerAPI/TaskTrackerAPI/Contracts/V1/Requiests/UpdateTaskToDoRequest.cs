@@ -8,5 +8,6 @@ namespace TaskTrackerApi.Contracts.V1.Requiests
     public class UpdateTaskToDoRequest
     {
         public string Name { get; set; }
+        public IEnumerable<string> Tags { get; set; }
     }
 }

@@ -68,10 +68,14 @@ namespace TaskTrackerApi.Controllers
         [HttpPost(ApiRoutes.Tasks.Create)]
         public async Task<IActionResult> CreateAsync([FromBody] CreateTaskToDoRequest taskRequest)
         {
+            var newPostId = Guid.NewGuid();
+
             var taskToDo = new TaskToDo
             {
+                Id = newPostId,
                 Name = taskRequest.Name,
-                UserId = HttpContext.GetUserId()
+                UserId = HttpContext.GetUserId(),
+                Tags = taskRequest.Tags.Select(tagName => new TaskToDoTag { TagName = tagName, TaskToDoId = newPostId }).ToList()
             };
 
             await _taskService.CreateTaskAsync(taskToDo);

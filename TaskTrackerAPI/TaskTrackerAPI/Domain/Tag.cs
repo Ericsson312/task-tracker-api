@@ -8,14 +8,13 @@ using System.Threading.Tasks;
 
 namespace TaskTrackerApi.Domain
 {
-    public class TaskToDo
+    public class Tag
     {
         [Key]
-        public Guid Id { get; set; }
         public string Name { get; set; }
-        public string UserId { get; set; }
-        [ForeignKey(nameof(UserId))]
-        public IdentityUser User { get; set; }
-        public virtual List<TaskToDoTag> Tags { get; set; }
+        public string CreatorId { get; set; }
+        [ForeignKey(nameof(CreatorId))]
+        public IdentityUser CreatedBy { get; set; }
+        public DateTime CreatedOn { get; set; }
     }
 }

@@ -50,6 +50,8 @@ namespace TaskTrackerApi.Installers
                 x.TokenValidationParameters = tokenValidationParameters;
             });
 
+            services.AddAuthorization();
+
             services.AddSwaggerGen(x =>
             {
                 x.SwaggerDoc("v1", new OpenApiInfo { Title = "Task Tracker API", Version = "v1" });
