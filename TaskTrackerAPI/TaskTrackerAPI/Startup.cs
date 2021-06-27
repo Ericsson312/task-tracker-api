@@ -38,14 +38,6 @@ namespace TaskTrackerApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // uncoment this code when you want to perform a database migration inside docker container
-            //using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
-            //.CreateScope())
-            //{
-            //    serviceScope.ServiceProvider.GetService<DataContext>()
-            //        .Database.Migrate();
-            //}
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

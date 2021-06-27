@@ -10,7 +10,7 @@ using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Controllers.V1
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     public class TagsController : Controller
     {
         private readonly ITaskToDoService _taskService;
