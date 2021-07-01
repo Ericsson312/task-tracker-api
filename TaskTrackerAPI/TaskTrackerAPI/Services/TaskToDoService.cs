@@ -80,7 +80,55 @@ namespace TaskTrackerApi.Services
 
         public async Task<List<Tag>> GetTagsAsync()
         {
-            return await _dataContext.Tags.ToListAsync();
+            return await _dataContext.Tags.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<Tag> GetTagByNameAsync(string tagName)
+        {
+            return await _dataContext.Tags
+                .AsNoTracking()
+                .SingleOrDefaultAsync(x => x.Name == tagName);
+        }
+
+        public async Task<bool> CreateTagAsync(Tag tag)
+        {
+            tag.Name = tag.Name.ToLower();
+
+            var tagExist = await _dataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tag.Name);
+
+            if (tagExist != null)
+            {
+                return true;
+            }
+
+            await _dataContext.Tags.AddAsync(new Tag
+            {
+                Name = tag.Name,
+                CreatedOn = DateTime.UtcNow,
+                CreatorId = tag.CreatorId
+            });
+
+            var created = await _dataContext.SaveChangesAsync();
+
+            return created > 0;
+        }
+
+        public async Task<bool> DeleteTagAsync(string tagName)
+        {
+            var tag = await _dataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tagName.ToLower());
+
+            if (tag == null)
+            {
+                return true;
+            }
+
+            var taskToDoTag = await _dataContext.TaskToDoTags.Where(x => x.TagName == tagName.ToLower()).ToListAsync();
+
+            _dataContext.TaskToDoTags.RemoveRange(taskToDoTag);
+            _dataContext.Tags.Remove(tag);
+            var result = await _dataContext.SaveChangesAsync();
+
+            return result > taskToDoTag.Count;
         }
 
         private async Task AddNewTag(TaskToDo taskToDo)
@@ -94,7 +142,12 @@ namespace TaskTrackerApi.Services
                     continue;
                 }
 
-                await _dataContext.Tags.AddAsync(new Tag { Name = tag.TagName, CreatedOn = DateTime.UtcNow, CreatorId = taskToDo.UserId });
+                await _dataContext.Tags.AddAsync(new Tag 
+                { 
+                    Name = tag.TagName, 
+                    CreatedOn = DateTime.UtcNow, 
+                    CreatorId = taskToDo.UserId 
+                });
             }
         }
     }

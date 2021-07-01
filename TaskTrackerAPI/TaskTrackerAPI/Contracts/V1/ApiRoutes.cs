@@ -15,14 +15,17 @@ namespace TaskTrackerApi.Contracts
         {
             public const string GetAll = Base + "/tasks";
             public const string Get = Base + "/tasks/{taskId}";
+            public const string Create = Base + "/tasks";
             public const string Update = Base + "/tasks/{taskId}";
             public const string Delete = Base + "/tasks/{taskId}";
-            public const string Create = Base + "/tasks";
         }
 
         public static class Tags
         {
             public const string GetAll = Base + "/tags";
+            public const string Get = Base + "/tags/{tagName}";
+            public const string Create = Base + "/tags";
+            public const string Delete = Base + "/tags/{tagName}";
         }
 
         public static class Identity

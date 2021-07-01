@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,8 +57,8 @@ namespace TaskTracker_IntegrationTest
         {
             var response = await _testClient.PostAsJsonAsync(ApiRoutes.Identity.Register, new UserRegistrationRequest
             {
-                Email = "test@integration.com",
-                Password = "Test12345!"
+                Email = "adam@tasker.com",
+                Password = "Adam12345!"
             });
 
             var registrationResponse = await response.Content.ReadAsAsync<AuthSuccessResponse>();

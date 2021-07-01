@@ -59,7 +59,10 @@ namespace TaskTrackerApi.Services
                 };
             }
 
-            await _userManager.AddToRoleAsync(newUser, "User");
+            if (await _roleManager.RoleExistsAsync("User"))
+            {
+                var a = await _userManager.AddToRoleAsync(newUser, "User");
+            }
 
             return await GenerateAuthenticationResultForUserAsync(newUser);
         }
