@@ -26,7 +26,7 @@ namespace TaskTrackerApi.Services
 
         public async Task<List<TaskToDo>> GetTasksAsync()
         {
-            return await _dataContext.TasksToDo.ToListAsync();
+            return await _dataContext.TasksToDo.Include(x => x.Tags).ToListAsync();
         }
 
         public async Task<bool> CreateTaskAsync(TaskToDo taskToDo)

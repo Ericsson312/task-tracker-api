@@ -26,7 +26,13 @@ namespace TaskTrackerApi.Controllers.V1
         [HttpGet(ApiRoutes.Tags.GetAll)]
         public async Task<IActionResult> GetAllAsync()
         {
-            return Ok(await _taskService.GetTagsAsync());
+            var tags = await _taskService.GetTagsAsync();
+            var tagResponses = tags.Select(x => new TagResponse
+            {
+                Name = x.Name
+            });
+
+            return Ok(tagResponses);
         }
 
         [HttpGet(ApiRoutes.Tags.Get)]

@@ -26,7 +26,16 @@ namespace TaskTrackerApi.Controllers
         [HttpGet(ApiRoutes.Tasks.GetAll)]
         public async Task<IActionResult> GetAllAsync()
         {
-            return Ok(await _taskService.GetTasksAsync());
+            var tasksToDo = await _taskService.GetTasksAsync();
+            var taskToDoResponses = tasksToDo.Select(x => new TaskToDoResponse
+            {
+                Id = x.Id,
+                Name = x.Name,
+                UserId = x.UserId,
+                Tags = x.Tags.Select(xx => new TagResponse { Name = xx.TagName }).ToList()
+            });
+
+            return Ok(taskToDoResponses);
         }
 
         [HttpGet(ApiRoutes.Tasks.Get)]
@@ -39,7 +48,13 @@ namespace TaskTrackerApi.Controllers
                 return NotFound();
             }
 
-            return Ok(taskToDo);
+            return Ok(new TaskToDoResponse 
+            {
+                Id = taskToDo.Id,
+                Name = taskToDo.Name,
+                UserId = taskToDo.UserId,
+                Tags = taskToDo.Tags.Select(x => new TagResponse { Name = x.TagName }).ToList()
+            });
         }
 
         [HttpPut(ApiRoutes.Tasks.Update)]
@@ -59,7 +74,13 @@ namespace TaskTrackerApi.Controllers
 
             if (updated)
             {
-                return Ok(taskToUpdate);
+                return Ok(new TaskToDoResponse
+                {
+                    Id = taskToUpdate.Id,
+                    Name = taskToUpdate.Name,
+                    UserId = taskToUpdate.UserId,
+                    Tags = taskToUpdate.Tags.Select(x => new TagResponse { Name = x.TagName }).ToList()
+                });
             }
 
             return NotFound();
@@ -83,7 +104,13 @@ namespace TaskTrackerApi.Controllers
             var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
             var location = $"{baseUrl}/{ApiRoutes.Tasks.Get.Replace("{taskId}", taskToDo.Id.ToString())}";
 
-            var response = new TaskToDoResponse { Id = taskToDo.Id };
+            var response = new TaskToDoResponse 
+            { 
+                Id = taskToDo.Id,
+                Name = taskToDo.Name,
+                UserId = taskToDo.UserId,
+                Tags = taskToDo.Tags.Select(x => new TagResponse { Name = x.TagName }).ToList()
+            };
 
             return Created(location, response);
         }
