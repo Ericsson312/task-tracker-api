@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TaskTrackerApi.Authorization;
 using TaskTrackerApi.Options;
 using TaskTrackerApi.Services;
 
@@ -50,7 +52,15 @@ namespace TaskTrackerApi.Installers
                 x.TokenValidationParameters = tokenValidationParameters;
             });
 
-            services.AddAuthorization();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("MustWorkForTasker", policy =>
+                {
+                    policy.AddRequirements(new WorksForCompanyRequirement("tasker.com"));
+                });
+            });
+
+            services.AddSingleton<IAuthorizationHandler, WorksForCompanyHandler>();
 
             services.AddSwaggerGen(x =>
             {

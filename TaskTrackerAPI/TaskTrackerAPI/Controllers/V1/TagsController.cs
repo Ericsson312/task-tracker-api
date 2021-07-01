@@ -14,7 +14,7 @@ using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Controllers.V1
 {
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "MustWorkForTasker")]
     public class TagsController : Controller
     {
         private readonly ITaskToDoService _taskService;
@@ -68,6 +68,7 @@ namespace TaskTrackerApi.Controllers.V1
         }
 
         [HttpDelete(ApiRoutes.Tags.Delete)]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync([FromRoute] string tagName)
         {
             var deleted = await _taskService.DeleteTagAsync(tagName);
