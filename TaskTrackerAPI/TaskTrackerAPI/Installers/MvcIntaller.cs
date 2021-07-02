@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TaskTrackerApi.Authorization;
+using TaskTrackerApi.Filters;
 using TaskTrackerApi.Options;
 using TaskTrackerApi.Services;
 
@@ -26,7 +28,13 @@ namespace TaskTrackerApi.Installers
 
             services.AddScoped<IIdentityService, IdentityService>();
 
-            services.AddMvc(options => { options.EnableEndpointRouting = false; }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services.AddMvc(options => 
+            { 
+                options.EnableEndpointRouting = false;
+                options.Filters.Add<ValidationFilter>();
+            })
+            .AddFluentValidation(mvcConfiguration => mvcConfiguration.RegisterValidatorsFromAssemblyContaining<Startup>())
+            .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             var tokenValidationParameters = new TokenValidationParameters
             {

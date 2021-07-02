@@ -51,6 +51,10 @@ namespace TaskTrackerApi.Controllers.V1
         [HttpPost(ApiRoutes.Tags.Create)]
         public async Task<IActionResult> CreateAsync([FromBody] CreateTagRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+
+            }
             var newTag = new Tag
             {
                 Name = request.Name,
