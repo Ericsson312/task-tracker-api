@@ -18,7 +18,7 @@ using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Installers
 {
-    public class MvcIntaller : IInstaller
+    public class MvcInstaller : IInstaller
     {
         public void InstallService(IServiceCollection services, IConfiguration configuration)
         {

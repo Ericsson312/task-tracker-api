@@ -17,7 +17,7 @@ namespace TaskTrackerApi.Installers
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<DataContext>();
 
-            services.AddScoped<ITaskToDoService, TaskToDoService>();
+            services.AddScoped<ICardService, CardService>();
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TaskTrackerApi.Domain
 {
-    public class TaskToDo
+    public class Card
     {
         [Key]
         public Guid Id { get; set; }
@@ -16,6 +16,6 @@ namespace TaskTrackerApi.Domain
         public string UserId { get; set; }
         [ForeignKey(nameof(UserId))]
         public IdentityUser User { get; set; }
-        public virtual List<TaskToDoTag> Tags { get; set; }
+        public virtual List<CardTag> Tags { get; set; }
     }
 }

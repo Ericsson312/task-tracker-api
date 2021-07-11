@@ -11,13 +11,13 @@ namespace TaskTrackerApi.Contracts
         public const string Version = "v1";
         public const string Base = Root + "/" + Version;
 
-        public static class Tasks
+        public static class Cards
         {
-            public const string GetAll = Base + "/tasks";
-            public const string Get = Base + "/tasks/{taskId}";
-            public const string Create = Base + "/tasks";
-            public const string Update = Base + "/tasks/{taskId}";
-            public const string Delete = Base + "/tasks/{taskId}";
+            public const string GetAll = Base + "/cards";
+            public const string Get = Base + "/cards/{cardId}";
+            public const string Create = Base + "/cards";
+            public const string Update = Base + "/cards/{cardId}";
+            public const string Delete = Base + "/cards/{cardId}";
         }
 
         public static class Tags

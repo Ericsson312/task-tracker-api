@@ -6,7 +6,7 @@ using TaskTrackerApi.Domain;
 
 namespace TaskTrackerApi.Contracts.V1.Responses
 {
-    public class TaskToDoResponse
+    public class CardResponse
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

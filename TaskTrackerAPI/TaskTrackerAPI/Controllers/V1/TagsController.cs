@@ -17,8 +17,8 @@ namespace TaskTrackerApi.Controllers.V1
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "MustWorkForTasker")]
     public class TagsController : Controller
     {
-        private readonly ITaskToDoService _taskService;
-        public TagsController(ITaskToDoService taskService)
+        private readonly ICardService _taskService;
+        public TagsController(ICardService taskService)
         {
             _taskService = taskService;
         }
@@ -51,10 +51,6 @@ namespace TaskTrackerApi.Controllers.V1
         [HttpPost(ApiRoutes.Tags.Create)]
         public async Task<IActionResult> CreateAsync([FromBody] CreateTagRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-
-            }
             var newTag = new Tag
             {
                 Name = request.Name,

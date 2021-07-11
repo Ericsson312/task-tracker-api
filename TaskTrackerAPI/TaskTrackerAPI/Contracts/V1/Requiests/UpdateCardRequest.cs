@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace TaskTrackerApi.Contracts.V1.Requiests
 {
-    public class ErrorModel
+    public class UpdateCardRequest
     {
-        public string FieldName { get; set; }
-        public string Message { get; set; }
+        public string Name { get; set; }
+        public IEnumerable<string> Tags { get; set; }
     }
 }

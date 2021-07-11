@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace TaskTrackerApi.Contracts.V1.Requiests
 {
-    public class ErrorResponse
+    public class CreateCardRequest
     {
-        public List<ErrorModel> Errors { get; set; } = new List<ErrorModel>();
+        public string Name { get; set; }
+        public IEnumerable<string> Tags { get; set; }
     }
 }

@@ -47,10 +47,10 @@ namespace TaskTracker_IntegrationTest
             _testClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", await GetJwtAsync());
         }
 
-        protected async Task<TaskToDoResponse> CreateAsync(CreateTaskToDoRequest request)
+        protected async Task<CardResponse> CreateAsync(CreateCardRequest request)
         {
-            var response = await _testClient.PostAsJsonAsync(ApiRoutes.Tasks.Create, request);
-            return await response.Content.ReadAsAsync<TaskToDoResponse>();
+            var response = await _testClient.PostAsJsonAsync(ApiRoutes.Cards.Create, request);
+            return await response.Content.ReadAsAsync<CardResponse>();
         }
 
         private async Task<string> GetJwtAsync()
