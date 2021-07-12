@@ -11,6 +11,7 @@
             public const string GetAll = Base + "/boards";
             public const string Get = Base + "/boards/{boardId}";
             public const string Create = Base + "/boards";
+            public const string Delete = Base + "/boards/{boardId}";
             
         }
         public static class Cards

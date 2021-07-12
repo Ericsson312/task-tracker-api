@@ -7,18 +7,22 @@ namespace TaskTrackerApi.Services
 {
     public interface IBoardService
     {
-        #region Boear service
+        #region Board service
         Task<List<Board>> GetBoardsAsync();
         Task<bool> CreateBoardAsync(Board board);
+        Task<Board> GetBoardByIdAsync(Guid boardId);
+        Task<bool> UpdateBoardAsync(Board board);
+        Task<bool> DeleteBoardIdAsync(Guid cardId);
+        Task<bool> UserOwnsBoardAsync(Guid boardId, string userId);
         #endregion
         
         #region Card service
         Task<List<Card>> GetCardsAsync();
-        Task<Card> GetCardByIdAsync(Guid taskId);
-        Task<bool> CreateCardAsync(Card taskToDo);
-        Task<bool> UpdateCardAsync(Card taskToUpdate);
-        Task<bool> DeleteCardAsync(Guid taskId);
-        Task<bool> UserOwnsCardAsync(Guid taskId, string userId);
+        Task<Card> GetCardByIdAsync(Guid cardId);
+        Task<bool> CreateCardAsync(Card card);
+        Task<bool> UpdateCardAsync(Card card);
+        Task<bool> DeleteCardAsync(Guid cardId);
+        Task<bool> UserOwnsCardAsync(Guid cardId, string userId);
         #endregion
 
         #region Tag service
