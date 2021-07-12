@@ -6,28 +6,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TaskTrackerApi.Contracts;
-using TaskTrackerApi.Contracts.V1.Requiests;
+using TaskTrackerApi.Contracts.V1;
+using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Domain;
 using TaskTrackerApi.Extensions;
 using TaskTrackerApi.Services;
 
-namespace TaskTrackerApi.Controllers
+namespace TaskTrackerApi.Controllers.V1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CardController : Controller
     {
-        private readonly ICardService _cardService;
-        public CardController(ICardService cardService)
+        private readonly IBoardService _boardService;
+        
+        public CardController(IBoardService boardService)
         {
-            _cardService = cardService;
+            _boardService = boardService;
         }
 
         [HttpGet(ApiRoutes.Cards.GetAll)]
         public async Task<IActionResult> GetAllAsync()
         {
-            var card = await _cardService.GetCardsAsync();
-            var cardResponse = card.Select(x => new CardResponse
+            var cards = await _boardService.GetCardsAsync();
+            var cardResponse = cards.Select(x => new CardResponse
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -41,7 +43,7 @@ namespace TaskTrackerApi.Controllers
         [HttpGet(ApiRoutes.Cards.Get)]
         public async Task<IActionResult> GetAsync([FromRoute] Guid cardId)
         {
-            var card = await _cardService.GetCardByIdAsync(cardId);
+            var card = await _boardService.GetCardByIdAsync(cardId);
 
             if (card == null)
             {
@@ -60,17 +62,17 @@ namespace TaskTrackerApi.Controllers
         [HttpPut(ApiRoutes.Cards.Update)]
         public async Task<IActionResult> UpdateAsync([FromRoute] Guid cardId, [FromBody] UpdateCardRequest cardRequest)
         {
-            var userOwnsCard = await _cardService.UserOwnsCardAsync(cardId, HttpContext.GetUserId());
+            var userOwnsCard = await _boardService.UserOwnsCardAsync(cardId, HttpContext.GetUserId());
 
             if (!userOwnsCard)
             {
                 return BadRequest(new { error = "You do not own this card" });
             }
 
-            var cardToUpdate = await _cardService.GetCardByIdAsync(cardId);
+            var cardToUpdate = await _boardService.GetCardByIdAsync(cardId);
             cardToUpdate.Name = cardRequest.Name;
 
-            var updated = await _cardService.UpdateCardAsync(cardToUpdate);
+            var updated = await _boardService.UpdateCardAsync(cardToUpdate);
 
             if (updated)
             {
@@ -99,7 +101,7 @@ namespace TaskTrackerApi.Controllers
                 Tags = cardRequest.Tags.Select(tagName => new CardTag { TagName = tagName, CardId = newCardId }).ToList()
             };
 
-            await _cardService.CreateCardAsync(card);
+            await _boardService.CreateCardAsync(card);
 
             var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
             var location = $"{baseUrl}/{ApiRoutes.Cards.Get.Replace("{cardId}", card.Id.ToString())}";
@@ -116,16 +118,16 @@ namespace TaskTrackerApi.Controllers
         }
 
         [HttpDelete(ApiRoutes.Cards.Delete)]
-        public async Task<IActionResult> DeleteAsync([FromRoute] Guid taskId)
+        public async Task<IActionResult> DeleteAsync([FromRoute] Guid cardId)
         {
-            var userOwnsCard = await _cardService.UserOwnsCardAsync(taskId, HttpContext.GetUserId());
+            var userOwnsCard = await _boardService.UserOwnsCardAsync(cardId, HttpContext.GetUserId());
 
             if (!userOwnsCard)
             {
                 return BadRequest(new { error = "You do not own this card" });
             }
 
-            var deleted = await _cardService.DeleteCardAsync(taskId);
+            var deleted = await _boardService.DeleteCardAsync(cardId);
 
             if (deleted)
             {

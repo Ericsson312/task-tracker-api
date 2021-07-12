@@ -9,7 +9,7 @@ using TaskTrackerApi.Data;
 namespace TaskTrackerApi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    partial class DataContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -219,6 +219,67 @@ namespace TaskTrackerApi.Data.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("TaskTrackerApi.Domain.Board", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Boards");
+                });
+
+            modelBuilder.Entity("TaskTrackerApi.Domain.Card", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BoardId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BoardId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Cards");
+                });
+
+            modelBuilder.Entity("TaskTrackerApi.Domain.CardTag", b =>
+                {
+                    b.Property<Guid>("CardId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TagName")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("CardId", "TagName");
+
+                    b.HasIndex("TagName");
+
+                    b.ToTable("CardTags");
+                });
+
             modelBuilder.Entity("TaskTrackerApi.Domain.RefreshToken", b =>
                 {
                     b.Property<string>("Token")
@@ -266,40 +327,6 @@ namespace TaskTrackerApi.Data.Migrations
                     b.HasIndex("CreatorId");
 
                     b.ToTable("Tags");
-                });
-
-            modelBuilder.Entity("TaskTrackerApi.Domain.TaskToDo", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("TasksToDo");
-                });
-
-            modelBuilder.Entity("TaskTrackerApi.Domain.TaskToDoTag", b =>
-                {
-                    b.Property<Guid>("TaskToDoId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("TagName")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("TaskToDoId", "TagName");
-
-                    b.HasIndex("TagName");
-
-                    b.ToTable("TaskToDoTags");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -353,6 +380,39 @@ namespace TaskTrackerApi.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("TaskTrackerApi.Domain.Board", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("TaskTrackerApi.Domain.Card", b =>
+                {
+                    b.HasOne("TaskTrackerApi.Domain.Board", null)
+                        .WithMany("Cards")
+                        .HasForeignKey("BoardId");
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("TaskTrackerApi.Domain.CardTag", b =>
+                {
+                    b.HasOne("TaskTrackerApi.Domain.Card", null)
+                        .WithMany("Tags")
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaskTrackerApi.Domain.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("TaskTrackerApi.Domain.RefreshToken", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
@@ -365,28 +425,6 @@ namespace TaskTrackerApi.Data.Migrations
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "CreatedBy")
                         .WithMany()
                         .HasForeignKey("CreatorId");
-                });
-
-            modelBuilder.Entity("TaskTrackerApi.Domain.TaskToDo", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-                });
-
-            modelBuilder.Entity("TaskTrackerApi.Domain.TaskToDoTag", b =>
-                {
-                    b.HasOne("TaskTrackerApi.Domain.Tag", "Tag")
-                        .WithMany()
-                        .HasForeignKey("TagName")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TaskTrackerApi.Domain.TaskToDo", null)
-                        .WithMany("Tags")
-                        .HasForeignKey("TaskToDoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

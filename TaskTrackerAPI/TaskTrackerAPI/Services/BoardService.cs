@@ -8,25 +8,35 @@ using TaskTrackerApi.Domain;
 
 namespace TaskTrackerApi.Services
 {
-    public class CardService : ICardService
+    public class BoardService : IBoardService
     {
         private readonly DataContext _dataContext;
 
-        public CardService(DataContext dataContext)
+        public BoardService(DataContext dataContext)
         {
             _dataContext = dataContext;
+        }
+        
+        public Task<List<Board>> GetBoardsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> CreateBoardAsync(Board board)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Card> GetCardByIdAsync(Guid cardId)
         {
-            return await _dataContext.TasksToDo
+            return await _dataContext.Cards
                 .Include(x => x.Tags)
                 .SingleOrDefaultAsync(x => x.Id == cardId);
         }
 
         public async Task<List<Card>> GetCardsAsync()
         {
-            return await _dataContext.TasksToDo.Include(x => x.Tags).ToListAsync();
+            return await _dataContext.Cards.Include(x => x.Tags).ToListAsync();
         }
 
         public async Task<bool> CreateCardAsync(Card card)
@@ -35,7 +45,7 @@ namespace TaskTrackerApi.Services
 
             await AddNewTag(card);
 
-            await _dataContext.TasksToDo.AddAsync(card);
+            await _dataContext.Cards.AddAsync(card);
             var created = await _dataContext.SaveChangesAsync();
 
             return created > 0;
@@ -43,7 +53,7 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> UpdateCardAsync(Card cardToUpdate)
         {
-            _dataContext.TasksToDo.Update(cardToUpdate);
+            _dataContext.Cards.Update(cardToUpdate);
             var updated = await _dataContext.SaveChangesAsync();
 
             return updated > 0;
@@ -58,17 +68,17 @@ namespace TaskTrackerApi.Services
                 return false;
             }
 
-            _dataContext.TasksToDo.Remove(cardToDelete);
+            _dataContext.Cards.Remove(cardToDelete);
             var deleted = await _dataContext.SaveChangesAsync();
 
             return deleted > 0;
         }
 
-        public async Task<bool> UserOwnsCardAsync(Guid cardId, string UserId)
+        public async Task<bool> UserOwnsCardAsync(Guid cardId, string userId)
         {
-            var card = await _dataContext.TasksToDo
+            var card = await _dataContext.Cards
                 .AsNoTracking()
-                .SingleOrDefaultAsync(x => x.Id == cardId && x.UserId == UserId);
+                .SingleOrDefaultAsync(x => x.Id == cardId && x.UserId == userId);
 
             if (card == null)
             {
@@ -122,13 +132,13 @@ namespace TaskTrackerApi.Services
                 return true;
             }
 
-            var taskToDoTag = await _dataContext.TaskToDoTags.Where(x => x.TagName == tagName.ToLower()).ToListAsync();
+            var cardTags = await _dataContext.CardTags.Where(x => x.TagName == tagName.ToLower()).ToListAsync();
 
-            _dataContext.TaskToDoTags.RemoveRange(taskToDoTag);
+            _dataContext.CardTags.RemoveRange(cardTags);
             _dataContext.Tags.Remove(tag);
             var result = await _dataContext.SaveChangesAsync();
 
-            return result > taskToDoTag.Count;
+            return result > cardTags.Count;
         }
 
         private async Task AddNewTag(Card card)

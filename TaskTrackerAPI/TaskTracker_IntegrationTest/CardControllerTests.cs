@@ -6,7 +6,8 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using TaskTrackerApi.Contracts;
-using TaskTrackerApi.Contracts.V1.Requiests;
+using TaskTrackerApi.Contracts.V1;
+using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Domain;
 using Xunit;
 

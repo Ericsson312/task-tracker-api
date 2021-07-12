@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace TaskTrackerApi.Contracts
+﻿namespace TaskTrackerApi.Contracts.V1
 {
     public static class ApiRoutes
     {
@@ -11,6 +6,13 @@ namespace TaskTrackerApi.Contracts
         public const string Version = "v1";
         public const string Base = Root + "/" + Version;
 
+        public static class Board
+        {
+            public const string GetAll = Base + "/boards";
+            public const string Get = Base + "/boards/{boardId}";
+            public const string Create = Base + "/boards";
+            
+        }
         public static class Cards
         {
             public const string GetAll = Base + "/cards";

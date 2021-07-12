@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace TaskTrackerApi.Contracts.V1.Requiests
+namespace TaskTrackerApi.Contracts.V1.Requests
 {
-    public class CreateTagRequest
+    public class UpdateCardRequest
     {
         public string Name { get; set; }
+        public IEnumerable<string> Tags { get; set; }
     }
 }

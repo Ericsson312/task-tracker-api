@@ -9,7 +9,7 @@ namespace TaskTrackerApi.Domain
     public class CardTag
     {
         [ForeignKey(nameof(TagName))]
-        public Tag Tag { get; set; }
+        public virtual Tag Tag { get; set; }
         public string TagName { get; set; }
         public virtual Card Card { get; set; }
         public Guid CardId { get; set; }

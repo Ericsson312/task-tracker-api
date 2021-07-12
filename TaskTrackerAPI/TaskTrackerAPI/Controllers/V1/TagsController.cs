@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TaskTrackerApi.Contracts;
-using TaskTrackerApi.Contracts.V1.Requiests;
+using TaskTrackerApi.Contracts.V1;
+using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Domain;
 using TaskTrackerApi.Extensions;
@@ -17,8 +18,8 @@ namespace TaskTrackerApi.Controllers.V1
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "MustWorkForTasker")]
     public class TagsController : Controller
     {
-        private readonly ICardService _taskService;
-        public TagsController(ICardService taskService)
+        private readonly IBoardService _taskService;
+        public TagsController(IBoardService taskService)
         {
             _taskService = taskService;
         }

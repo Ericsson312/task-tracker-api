@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TaskTrackerApi.Contracts;
-using TaskTrackerApi.Contracts.V1.Requiests;
+using TaskTrackerApi.Contracts.V1;
+using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Services;
 

@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Data;
+using TaskTrackerApi.Repositories;
 using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Installers
@@ -17,7 +19,8 @@ namespace TaskTrackerApi.Installers
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<DataContext>();
 
-            services.AddScoped<ICardService, CardService>();
+            services.AddScoped<IBoardService, BoardService>();
+            services.AddSingleton<IBoardRepository, BoardRepository>();
         }
     }
 }
