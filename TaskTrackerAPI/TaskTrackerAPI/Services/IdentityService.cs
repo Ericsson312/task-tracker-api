@@ -59,6 +59,9 @@ namespace TaskTrackerApi.Services
                 };
             }
 
+            await _dataContext.Members.AddAsync(new Member{ Email = newUser.Email });
+            await _dataContext.SaveChangesAsync();
+
             if (await _roleManager.RoleExistsAsync("User"))
             {
                 var a = await _userManager.AddToRoleAsync(newUser, "User");

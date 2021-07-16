@@ -89,8 +89,17 @@ namespace TaskTrackerApi.Controllers.V1
         }
 
         [HttpPost(ApiRoutes.Cards.Create)]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateCardRequest cardRequest)
+        public async Task<IActionResult> CreateAsync([FromHeader] Guid boardId, [FromBody] CreateCardRequest cardRequest)
         {
+            var board = _boardService.GetBoardByIdAsync(boardId);
+
+            if (board == null)
+            {
+                return NotFound(new ErrorResponse(new ErrorModel{ Message = "The board you are trying to add card to does not exist"}));
+            }
+            
+            var userOwnsCard = await _boardService.UserOwnsCardAsync(boardId, HttpContext.GetUserId());
+            
             var newCardId = Guid.NewGuid();
 
             var card = new Card

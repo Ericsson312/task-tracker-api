@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using TaskTrackerApi.Data;
 using TaskTrackerApi.Domain;
 
@@ -16,15 +17,18 @@ namespace TaskTrackerApi.Services
         {
             _dataContext = dataContext;
         }
-        
-        public async Task<List<Board>> GetBoardsAsync()
+
+        #region Board service
+
+         public async Task<List<Board>> GetBoardsAsync()
         {
             return await _dataContext.Boards.ToListAsync();
         }
 
-        public async Task<bool> CreateBoardAsync(Board board)
+        public async Task<bool> CreateBoardAsync(string email, Board board)
         {
             await _dataContext.Boards.AddAsync(board);
+            await AddMemberToBoardAsync(email, board);
             var created = await _dataContext.SaveChangesAsync();
 
             return created > 0;
@@ -34,6 +38,7 @@ namespace TaskTrackerApi.Services
         {
             return await _dataContext.Boards
                 .Include(x => x.Cards)
+                .Include(x => x.Members)
                 .SingleOrDefaultAsync(x => x.Id == boardId);
         }
 
@@ -47,15 +52,15 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> DeleteBoardIdAsync(Guid boardId)
         {
-            var boardToDelete = await GetBoardByIdAsync(boardId);
+            var board = await GetBoardByIdAsync(boardId);
 
-            if (boardToDelete == null)
+            if (board == null)
             {
                 return false;
             }
             
-            _dataContext.Cards.RemoveRange(boardToDelete.Cards);
-            _dataContext.Boards.Remove(boardToDelete);
+            _dataContext.Cards.RemoveRange(board.Cards);
+            _dataContext.Boards.Remove(board);
             var deleted = await _dataContext.SaveChangesAsync();
 
             return deleted > 0;
@@ -75,7 +80,95 @@ namespace TaskTrackerApi.Services
             return true;
         }
 
+        public async Task<bool> UserBelongsToBoard(Guid boardId, string email)
+        {
+            var board = await _dataContext.Boards
+                .AsNoTracking()
+                .Include(x => x.Members)
+                .SingleOrDefaultAsync(x => x.Id == boardId);
+
+            if (board == null)
+            {
+                return false;
+            }
+
+            var result = board.Members.SingleOrDefault(x => x.MemberEmail == email);
+
+            if (result == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
+
+        #region Member service
+
+        public async Task<List<Member>> GetMembersAsync()
+        {
+            return await _dataContext.Members.ToListAsync();
+        }
+
+        public async Task<Member> GetMemberAsync(string email)
+        {
+            return await _dataContext.Members
+                .AsNoTracking()
+                .SingleOrDefaultAsync(x => x.Email == email);
+        }
+
+        public async Task<bool> DeleteMemberFromBoardAsync(string email, Board board)
+        {
+            var memberToDelete = await GetMemberAsync(email);
+
+            if (memberToDelete == null)
+            {
+                return true;
+            }
+
+            var boardMember = await _dataContext.BoardMembers
+                .Where(x => x.MemberEmail == memberToDelete.Email && 
+                            x.BoardId == board.Id).SingleOrDefaultAsync();
+
+            _dataContext.BoardMembers.Remove(boardMember);
+            var result = await _dataContext.SaveChangesAsync();
+                
+            return result > 0;
+        }
+        
+        public async Task<bool> AddMemberToBoardAsync(string email, Board board)
+        {
+            var memberToAdd = await GetMemberAsync(email);
+
+            if (memberToAdd == null)
+            {
+                return false;
+            }
+
+            if (board.Members.SingleOrDefault(x => x.MemberEmail == email) != null)
+            {
+                return true;
+            }
+            
+            var boardMember = new BoardMember
+            {
+                Board = board,
+                Member = memberToAdd,
+                BoardId = board.Id,
+                MemberEmail = memberToAdd.Email
+            };
+
+            await _dataContext.BoardMembers.AddAsync(boardMember);
+            var result = await _dataContext.SaveChangesAsync();
+
+            return result > 0;
+        }
+
+        #endregion
+        
         #region Card service
+        
         public async Task<List<Card>> GetCardsAsync()
         {
             return await _dataContext.Cards.Include(x => x.Tags).ToListAsync();
@@ -111,14 +204,14 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> DeleteCardAsync(Guid cardId)
         {
-            var cardToDelete = await GetCardByIdAsync(cardId);
+            var card = await GetCardByIdAsync(cardId);
 
-            if (cardToDelete == null)
+            if (card == null)
             {
                 return false;
             }
 
-            _dataContext.Cards.Remove(cardToDelete);
+            _dataContext.Cards.Remove(card);
             var deleted = await _dataContext.SaveChangesAsync();
 
             return deleted > 0;
@@ -137,9 +230,11 @@ namespace TaskTrackerApi.Services
 
             return true;
         }
+        
         #endregion
 
         #region Tag service
+        
         public async Task<List<Tag>> GetTagsAsync()
         {
             return await _dataContext.Tags.AsNoTracking().ToListAsync();
@@ -192,6 +287,7 @@ namespace TaskTrackerApi.Services
 
             return result > cardTags.Count;
         }
+        
         #endregion
 
         private async Task AddNewTag(Card card)

@@ -10,5 +10,6 @@ namespace TaskTrackerApi.Contracts.V1.Responses
         public string Description { get; set; }
         public string UserId { get; set; }
         public IEnumerable<CardResponse> Cards { get; set; }
+        public IEnumerable<MemberResponse> Members { get; set; }
     }
 }

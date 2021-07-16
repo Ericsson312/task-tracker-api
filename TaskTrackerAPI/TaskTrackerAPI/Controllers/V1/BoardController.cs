@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -26,22 +27,22 @@ namespace TaskTrackerApi.Controllers.V1
             _boardService = boardService;
         }
         
-        [HttpGet(ApiRoutes.Board.GetAll)]
-        // [Authorize(Roles = "Admin")]
-        // [Authorize(Roles = "Moderator")]
+        [HttpGet(ApiRoutes.Boards.GetAll)]
+        //[Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Moderator")]
         public async Task<IActionResult> GetAllAsync()
         {
             var boards =  await _boardService.GetBoardsAsync();
             
-            var bordsResponse = new List<BoardResponse>();
+            var boardResponses = new List<BoardResponse>();
 
             foreach (var board in boards)
             {
-                bordsResponse.Add(new BoardResponse
+                boardResponses.Add(new BoardResponse
                 {
                     Id = board.Id,
                     UserId = board.UserId,
-                    Name = board.Description,
+                    Name = board.Name,
                     Description = board.Description,
                     Cards = board.Cards?.Select(x => new CardResponse
                     {
@@ -49,14 +50,18 @@ namespace TaskTrackerApi.Controllers.V1
                         UserId = x.UserId,
                         Name = x.Name,
                         Tags = new List<TagResponse>()
+                    }).ToList(),
+                    Members = board.Members?.Select(x => new MemberResponse
+                    {
+                        Email = x.MemberEmail
                     }).ToList()
                 });
             }
 
-            return Ok(bordsResponse);
+            return Ok(boardResponses);
         }
         
-        [HttpGet(ApiRoutes.Board.Get)]
+        [HttpGet(ApiRoutes.Boards.Get)]
         public async Task<IActionResult> GetAsync([FromRoute] Guid boardId)
         {
             var board =  await _boardService.GetBoardByIdAsync(boardId);
@@ -65,10 +70,18 @@ namespace TaskTrackerApi.Controllers.V1
             {
                 return NotFound();
             }
-  
+
+            var userBelongsToBoard = await _boardService.UserBelongsToBoard(boardId, HttpContext.GetUserEmail());
+
+            if (!userBelongsToBoard)
+            {
+                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not belong to the board"}));
+            }
+
             return Ok(new BoardResponse
             {
                 Id = board.Id,
+                UserId = board.UserId,
                 Name = board.Name,
                 Description = board.Description,
                 Cards = board.Cards.Select(x => new CardResponse
@@ -76,12 +89,51 @@ namespace TaskTrackerApi.Controllers.V1
                     Id = x.Id,
                     UserId = x.UserId,
                     Name = x.Name,
-                    Tags = x.Tags.Select(xx => new TagResponse { Name = xx.TagName }).ToList()
-                }).ToList()
+                    Tags = x.Tags.Select(xx => new TagResponse{ Name = xx.TagName }).ToList()
+                }).ToList(),
+                Members = board.Members.Select(x => new MemberResponse{ Email = x.MemberEmail }).ToList()
             });
         }
         
-        [HttpPost(ApiRoutes.Board.Create)]
+        [HttpPut(ApiRoutes.Boards.Update)]
+        public async Task<IActionResult> UpdateAsync([FromRoute] Guid boardId, [FromBody] UpdateBoardRequest boardRequest)
+        {
+            var userOwnsBoard = await _boardService.UserOwnsBoardAsync(boardId, HttpContext.GetUserId());
+
+            if (!userOwnsBoard)
+            {
+                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not own this board"}));
+            }
+
+            var boardToUpdate = await _boardService.GetBoardByIdAsync(boardId);
+            boardToUpdate.Name = boardRequest.Name;
+            boardToUpdate.Description = boardRequest.Description;
+
+            var updated = await _boardService.UpdateBoardAsync(boardToUpdate);
+
+            if (updated)
+            {
+                return Ok(new BoardResponse
+                {
+                    Id = boardToUpdate.Id,
+                    UserId = boardToUpdate.UserId,
+                    Name = boardToUpdate.Name,
+                    Description = boardToUpdate.Description,
+                    Cards = boardToUpdate.Cards.Select(x => new CardResponse
+                    {
+                        Id = x.Id,
+                        UserId = x.UserId,
+                        Name = x.Name,
+                        Tags = x.Tags.Select(xx => new TagResponse{ Name = xx.TagName }).ToList()
+                    }).ToList(),
+                    Members = boardToUpdate.Members.Select(xx => new MemberResponse{ Email = xx.MemberEmail }).ToList()
+                });
+            }
+
+            return NotFound();
+        }
+        
+        [HttpPost(ApiRoutes.Boards.Create)]
         public async Task <IActionResult> CreateAsync([FromBody] CreateBoardRequest boardRequest)
         {
             var newBoardId = Guid.NewGuid();
@@ -91,13 +143,13 @@ namespace TaskTrackerApi.Controllers.V1
                 Id = newBoardId,
                 Name = boardRequest.Name,
                 Description = boardRequest.Description,
-                UserId = HttpContext.GetUserId(),
+                UserId = HttpContext.GetUserId()
             };
 
-            await _boardService.CreateBoardAsync(board);
+            await _boardService.CreateBoardAsync(HttpContext.GetUserEmail(), board);
 
             var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
-            var location = $"{baseUrl}/{ApiRoutes.Board.Get.Replace("{boardId}", board.Id.ToString())}";
+            var location = $"{baseUrl}/{ApiRoutes.Boards.Get.Replace("{boardId}", board.Id.ToString())}";
             
             var response = new BoardResponse 
             { 
@@ -105,20 +157,21 @@ namespace TaskTrackerApi.Controllers.V1
                 UserId = board.UserId,
                 Name = board.Name,
                 Description = board.Description,
-                Cards = new List<CardResponse>()
+                Cards = new List<CardResponse>(),
+                Members = new List<MemberResponse>()
             };
             
             return Created(location, response);
         }
         
-        [HttpDelete(ApiRoutes.Board.Delete)]
+        [HttpDelete(ApiRoutes.Boards.Delete)]
         public async Task<IActionResult> DeleteAsync([FromRoute] Guid boardId)
         {
             var userOwnsBoard = await _boardService.UserOwnsBoardAsync(boardId, HttpContext.GetUserId());
 
             if (!userOwnsBoard)
             {
-                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not own this post"}));
+                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not own this board"}));
             }
 
             var deleted = await _boardService.DeleteBoardIdAsync(boardId);
