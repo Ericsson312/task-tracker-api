@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TaskTrackerApi.Data;
 
 namespace TaskTrackerApi.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20210718213904_Added_BoardIt_ToCard")]
+    partial class Added_BoardIt_ToCard
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -262,7 +264,10 @@ namespace TaskTrackerApi.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BoardId")
+                    b.Property<string>("BoardId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("BoardId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -273,7 +278,7 @@ namespace TaskTrackerApi.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BoardId");
+                    b.HasIndex("BoardId1");
 
                     b.HasIndex("UserId");
 
@@ -431,9 +436,7 @@ namespace TaskTrackerApi.Data.Migrations
                 {
                     b.HasOne("TaskTrackerApi.Domain.Board", null)
                         .WithMany("Cards")
-                        .HasForeignKey("BoardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("BoardId1");
 
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
                         .WithMany()

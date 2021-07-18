@@ -20,7 +20,10 @@ namespace TaskTrackerApi.Installers
                 .AddEntityFrameworkStores<DataContext>();
 
             services.AddScoped<IBoardService, BoardService>();
-            services.AddSingleton<IBoardRepository, BoardRepository>();
+            services.AddScoped<IBoardRepository, BoardRepository>();
+            services.AddScoped<ICardRepository, CardRepository>();
+            services.AddScoped<IMemberRepository, MemberRepository>();
+            services.AddScoped<ITagRepository, TagRepository>();
         }
     }
 }

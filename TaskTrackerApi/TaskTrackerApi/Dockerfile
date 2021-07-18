@@ -1,4 +1,4 @@
-# specify the target SDK
+# specify the target SDK (base image)
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
 
 ARG BUILDCONFIG=RELEASE

@@ -64,18 +64,18 @@ namespace TaskTrackerApi.Controllers.V1
         [HttpGet(ApiRoutes.Boards.Get)]
         public async Task<IActionResult> GetAsync([FromRoute] Guid boardId)
         {
-            var board =  await _boardService.GetBoardByIdAsync(boardId);
-
-            if (board == null)
-            {
-                return NotFound();
-            }
-
             var userBelongsToBoard = await _boardService.UserBelongsToBoard(boardId, HttpContext.GetUserEmail());
 
             if (!userBelongsToBoard)
             {
                 return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not belong to the board"}));
+            }
+            
+            var board =  await _boardService.GetBoardByIdAsync(boardId);
+
+            if (board == null)
+            {
+                return NotFound();
             }
 
             return Ok(new BoardResponse
@@ -89,9 +89,9 @@ namespace TaskTrackerApi.Controllers.V1
                     Id = x.Id,
                     UserId = x.UserId,
                     Name = x.Name,
-                    Tags = x.Tags.Select(xx => new TagResponse{ Name = xx.TagName }).ToList()
+                    Tags = x.Tags?.Select(xx => new TagResponse{ Name = xx.TagName }).ToList()
                 }).ToList(),
-                Members = board.Members.Select(x => new MemberResponse{ Email = x.MemberEmail }).ToList()
+                Members = board.Members?.Select(x => new MemberResponse{ Email = x.MemberEmail }).ToList()
             });
         }
         

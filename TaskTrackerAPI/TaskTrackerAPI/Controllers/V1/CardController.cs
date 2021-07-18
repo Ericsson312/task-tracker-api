@@ -62,14 +62,21 @@ namespace TaskTrackerApi.Controllers.V1
         [HttpPut(ApiRoutes.Cards.Update)]
         public async Task<IActionResult> UpdateAsync([FromRoute] Guid cardId, [FromBody] UpdateCardRequest cardRequest)
         {
-            var userOwnsCard = await _boardService.UserOwnsCardAsync(cardId, HttpContext.GetUserId());
+            var cardToUpdate = await _boardService.GetCardByIdAsync(cardId);
 
-            if (!userOwnsCard)
+            if (cardToUpdate == null)
             {
-                return BadRequest(new { error = "You do not own this card" });
+                return NotFound(new ErrorResponse(new ErrorModel{ Message = "Invalid card id"}));
             }
 
-            var cardToUpdate = await _boardService.GetCardByIdAsync(cardId);
+            var board = await _boardService.GetBoardByCardIdAsync(cardId);
+            var userBelongsToBoard = await _boardService.UserBelongsToBoard(board.Id, HttpContext.GetUserEmail());
+
+            if (!userBelongsToBoard)
+            {
+                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not have permission to change this card"}));
+            }
+            
             cardToUpdate.Name = cardRequest.Name;
 
             var updated = await _boardService.UpdateCardAsync(cardToUpdate);
@@ -91,22 +98,29 @@ namespace TaskTrackerApi.Controllers.V1
         [HttpPost(ApiRoutes.Cards.Create)]
         public async Task<IActionResult> CreateAsync([FromHeader] Guid boardId, [FromBody] CreateCardRequest cardRequest)
         {
-            var board = _boardService.GetBoardByIdAsync(boardId);
+            var board = await _boardService.GetBoardByIdAsync(boardId);
 
             if (board == null)
             {
-                return NotFound(new ErrorResponse(new ErrorModel{ Message = "The board you are trying to add card to does not exist"}));
+                return NotFound(new ErrorResponse(new ErrorModel{ Message = "Invalid board id"}));
             }
             
-            var userOwnsCard = await _boardService.UserOwnsCardAsync(boardId, HttpContext.GetUserId());
+            var userBelongsToBoard = await _boardService.UserBelongsToBoard(boardId, HttpContext.GetUserEmail());
+
+            if (!userBelongsToBoard)
+            {
+                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not have permission to add new card"}));
+            }
             
             var newCardId = Guid.NewGuid();
+            var userId = HttpContext.GetUserId();
 
             var card = new Card
             {
                 Id = newCardId,
+                UserId = userId,
+                BoardId = boardId,
                 Name = cardRequest.Name,
-                UserId = HttpContext.GetUserId(),
                 Tags = cardRequest.Tags.Select(tagName => new CardTag { TagName = tagName, CardId = newCardId }).ToList()
             };
 
@@ -129,11 +143,12 @@ namespace TaskTrackerApi.Controllers.V1
         [HttpDelete(ApiRoutes.Cards.Delete)]
         public async Task<IActionResult> DeleteAsync([FromRoute] Guid cardId)
         {
-            var userOwnsCard = await _boardService.UserOwnsCardAsync(cardId, HttpContext.GetUserId());
+            var board = await _boardService.GetBoardByCardIdAsync(cardId);
+            var userBelongsToBoard = await _boardService.UserBelongsToBoard(board.Id, HttpContext.GetUserEmail());
 
-            if (!userOwnsCard)
+            if (!userBelongsToBoard)
             {
-                return BadRequest(new { error = "You do not own this card" });
+                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not have permission to change this card"}));
             }
 
             var deleted = await _boardService.DeleteCardAsync(cardId);
