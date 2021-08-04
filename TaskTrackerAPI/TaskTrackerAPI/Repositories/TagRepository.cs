@@ -21,7 +21,7 @@ namespace TaskTrackerApi.Repositories
             return await _dataContext.Tags.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Tag> GetTagByNameAsNoTrackingAsync(string tagName)
+        public async Task<Tag> GetTagByNameAsync(string tagName)
         {
             return await _dataContext.Tags
                 .AsNoTracking()

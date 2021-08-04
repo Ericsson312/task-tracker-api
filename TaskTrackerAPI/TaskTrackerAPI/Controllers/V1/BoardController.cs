@@ -174,7 +174,7 @@ namespace TaskTrackerApi.Controllers.V1
                 return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not own this board"}));
             }
 
-            var deleted = await _boardService.DeleteBoardIdAsync(boardId);
+            var deleted = await _boardService.DeleteBoardByIdAsync(boardId);
 
             if (deleted)
             {

@@ -14,7 +14,7 @@ namespace TaskTrackerApi.Services
         Task<Board> GetBoardByIdAsync(Guid boardId);
         Task<Board> GetBoardByCardIdAsync(Guid cardId);
         Task<bool> UpdateBoardAsync(Board board);
-        Task<bool> DeleteBoardIdAsync(Guid cardId);
+        Task<bool> DeleteBoardByIdAsync(Guid cardId);
         Task<bool> UserOwnsBoardAsync(Guid boardId, string userId);
         Task<bool> UserBelongsToBoard(Guid boardId, string email);
         

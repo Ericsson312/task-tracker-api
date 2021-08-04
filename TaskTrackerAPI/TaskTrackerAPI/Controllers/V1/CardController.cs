@@ -121,7 +121,7 @@ namespace TaskTrackerApi.Controllers.V1
                 UserId = userId,
                 BoardId = boardId,
                 Name = cardRequest.Name,
-                Tags = cardRequest.Tags.Select(tagName => new CardTag { TagName = tagName, CardId = newCardId }).ToList()
+                Tags = cardRequest.Tags?.Select(tagName => new CardTag { TagName = tagName, CardId = newCardId }).ToList()
             };
 
             await _boardService.CreateCardAsync(card);
@@ -134,7 +134,7 @@ namespace TaskTrackerApi.Controllers.V1
                 Id = card.Id,
                 Name = card.Name,
                 UserId = card.UserId,
-                Tags = card.Tags.Select(x => new TagResponse { Name = x.TagName }).ToList()
+                Tags = card.Tags?.Select(x => new TagResponse { Name = x.TagName }).ToList()
             };
 
             return Created(location, response);

@@ -18,21 +18,19 @@ namespace TaskTrackerApi.Repositories
             _dataContext = dataContext;
         }
 
-        public async Task<List<Board>> GetBoardsAsNoTrackingAsync()
+        public async Task<List<Board>> GetBoardsAsync()
         {
             return await _dataContext.Boards.AsNoTracking().ToListAsync();
         }
         
-        public async Task<Board> GetBoardByIdAsNoTrackingAsync(Guid boardId)
+        public async Task<Board> GetBoardByIdAsync(Guid boardId)
         {
-            var a = await _dataContext.Boards
+            return await _dataContext.Boards
                 .Include(m => m.Members)
                 .Include(c => c.Cards)
                 .ThenInclude(card => card.Tags)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(x => x.Id == boardId);
-
-            return a;
         }
 
         public async Task<bool> CreateBoardAsync(Board board)
@@ -51,7 +49,7 @@ namespace TaskTrackerApi.Repositories
             return updated > 0;
         }
 
-        public async Task<bool> DeleteBoardIdAsync(Board board)
+        public async Task<bool> DeleteBoardAsync(Board board)
         {
             _dataContext.Boards.Remove(board);
             var deleted = await _dataContext.SaveChangesAsync();
@@ -59,14 +57,14 @@ namespace TaskTrackerApi.Repositories
             return deleted > 0;
         }
 
-        public async Task<Board> GetBoardOwnedByUserAsNoTrackingAsync(Guid boardId, string userId)
+        public async Task<Board> GetBoardOwnedByUserAsync(Guid boardId, string userId)
         {
             return await _dataContext.Boards
                 .AsNoTracking()
                 .SingleOrDefaultAsync(x => x.Id == boardId && x.UserId == userId);
         }
 
-        public async Task<Board> GetBoardWhereUserIsMemberAsNoTrackingAsync(Guid boardId)
+        public async Task<Board> GetBoardWhereUserIsMemberAsync(Guid boardId)
         {
             return await _dataContext.Boards
                 .Include(x => x.Members)

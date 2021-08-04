@@ -32,13 +32,13 @@ namespace TaskTrackerApi.Services
 
          public async Task<List<Board>> GetBoardsAsync()
          {
-             return await _boardRepository.GetBoardsAsNoTrackingAsync();
+             return await _boardRepository.GetBoardsAsync();
              //return await _dataContext.Boards.ToListAsync();
          }
 
          public async Task<Board> GetBoardByIdAsync(Guid boardId)
          {
-             return await _boardRepository.GetBoardByIdAsNoTrackingAsync(boardId);
+             return await _boardRepository.GetBoardByIdAsync(boardId);
              // return await _dataContext.Boards
              //     .Include(x => x.Cards)
              //     .Include(x => x.Members)
@@ -47,7 +47,9 @@ namespace TaskTrackerApi.Services
 
          public async Task<Board> GetBoardByCardIdAsync(Guid cardId)
          {
-             return await _dataContext.Boards.AsNoTracking().Include(c => c.Cards).SingleOrDefaultAsync(x => x.Cards.Exists(xx => xx.Id == cardId));
+             return await _dataContext.Boards.AsNoTracking()
+                 .Include(c => c.Cards)
+                 .SingleOrDefaultAsync(x => x.Cards.Exists(xx => xx.Id == cardId));
          }
 
          public async Task<bool> CreateBoardAsync(string email, Board board)
@@ -71,9 +73,9 @@ namespace TaskTrackerApi.Services
             // return updated > 0;
         }
 
-        public async Task<bool> DeleteBoardIdAsync(Guid boardId)
+        public async Task<bool> DeleteBoardByIdAsync(Guid boardId)
         {
-            var board = await _boardRepository.GetBoardByIdAsNoTrackingAsync(boardId);
+            var board = await _boardRepository.GetBoardByIdAsync(boardId);
             //var board = await GetBoardByIdAsync(boardId);
 
             if (board == null)
@@ -81,7 +83,7 @@ namespace TaskTrackerApi.Services
                 return false;
             }
 
-            return await _boardRepository.DeleteBoardIdAsync(board);
+            return await _boardRepository.DeleteBoardAsync(board);
             // _dataContext.Cards.RemoveRange(board.Cards);
             // _dataContext.Boards.Remove(board);
             // var deleted = await _dataContext.SaveChangesAsync();
@@ -91,7 +93,7 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> UserOwnsBoardAsync(Guid boardId, string userId)
         {
-            var board = await _boardRepository.GetBoardOwnedByUserAsNoTrackingAsync(boardId, userId);
+            var board = await _boardRepository.GetBoardOwnedByUserAsync(boardId, userId);
             // var board = await _dataContext.Boards
             //     .AsNoTracking()
             //     .SingleOrDefaultAsync(x => x.Id == boardId && x.UserId == userId);
@@ -106,7 +108,7 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> UserBelongsToBoard(Guid boardId, string email)
         {
-            var board = await _boardRepository.GetBoardWhereUserIsMemberAsNoTrackingAsync(boardId);
+            var board = await _boardRepository.GetBoardWhereUserIsMemberAsync(boardId);
             // var board = await _dataContext.Boards
             //     .AsNoTracking()
             //     .Include(x => x.Members)
@@ -133,13 +135,13 @@ namespace TaskTrackerApi.Services
 
         public async Task<List<Member>> GetMembersAsync()
         {
-            return await _memberRepository.GetMembersAsNoTrackingAsync();
+            return await _memberRepository.GetMembersAsync();
             //return await _dataContext.Members.ToListAsync();
         }
 
         public async Task<Member> GetMemberAsync(string email)
         {
-            return await _memberRepository.GetMemberAsNoTrackingAsync(email);
+            return await _memberRepository.GetMemberAsync(email);
             // return await _dataContext.Members
             //     .AsNoTracking()
             //     .SingleOrDefaultAsync(x => x.Email == email);
@@ -147,7 +149,7 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> DeleteMemberFromBoardAsync(string email, Board board)
         {
-            var memberToDelete = await _memberRepository.GetMemberAsNoTrackingAsync(email);
+            var memberToDelete = await _memberRepository.GetMemberAsync(email);
             //var memberToDelete = await GetMemberAsync(email);
 
             if (memberToDelete == null)
@@ -168,7 +170,7 @@ namespace TaskTrackerApi.Services
         
         public async Task<bool> AddMemberToBoardAsync(string email, Board board)
         {
-            var memberToAdd = await _memberRepository.GetMemberAsNoTrackingAsync(email);
+            var memberToAdd = await _memberRepository.GetMemberAsync(email);
             //var memberToAdd = await GetMemberAsync(email);
 
             if (memberToAdd == null)
@@ -202,13 +204,13 @@ namespace TaskTrackerApi.Services
         
         public async Task<List<Card>> GetCardsAsync()
         {
-            return await _cardRepository.GetCardsAsNoTrackingAsync();
+            return await _cardRepository.GetCardsAsync();
             //return await _dataContext.Cards.Include(x => x.Tags).ToListAsync();
         }
 
         public async Task<Card> GetCardByIdAsync(Guid cardId)
         {
-            return await _cardRepository.GetCardByIdAsNoTrackingAsync(cardId);
+            return await _cardRepository.GetCardByIdAsync(cardId);
             // return await _dataContext.Cards
             //     .Include(x => x.Tags)
             //     .SingleOrDefaultAsync(x => x.Id == cardId);
@@ -217,9 +219,11 @@ namespace TaskTrackerApi.Services
         public async Task<bool> CreateCardAsync(Card card)
         {
             // normalize Tag names of the Card
-            card.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
-
-            await AddNewTag(card);
+            if (card.Tags != null)
+            {
+                card.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
+                await AddNewTag(card);   
+            }
 
             return await _cardRepository.CreateCardAsync(card);
             // await _dataContext.Cards.AddAsync(card);
@@ -239,7 +243,7 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> DeleteCardAsync(Guid cardId)
         {
-            var card = await _cardRepository.GetCardByIdAsNoTrackingAsync(cardId);
+            var card = await _cardRepository.GetCardByIdAsync(cardId);
             //var card = await GetCardByIdAsync(cardId);
 
             if (card == null)
@@ -279,14 +283,14 @@ namespace TaskTrackerApi.Services
 
         public async Task<Tag> GetTagByNameAsync(string tagName)
         {
-            return await _tagRepository.GetTagByNameAsNoTrackingAsync(tagName);
+            return await _tagRepository.GetTagByNameAsync(tagName);
         }
 
         public async Task<bool> CreateTagAsync(Tag tag)
         {
             tag.Name = tag.Name.ToLower();
 
-            var tagExist = await _tagRepository.GetTagByNameAsNoTrackingAsync(tag.Name);
+            var tagExist = await _tagRepository.GetTagByNameAsync(tag.Name);
 
             if (tagExist != null)
             {
@@ -303,7 +307,7 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> DeleteTagAsync(string tagName)
         {
-            var tag = await _tagRepository.GetTagByNameAsNoTrackingAsync(tagName.ToLower());
+            var tag = await _tagRepository.GetTagByNameAsync(tagName.ToLower());
             //var tag = await _dataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tagName.ToLower());
 
             if (tag == null)
@@ -329,7 +333,7 @@ namespace TaskTrackerApi.Services
         {
             foreach (var tag in card.Tags)
             {
-                var tagExist = await _tagRepository.GetTagByNameAsNoTrackingAsync(tag.TagName);
+                var tagExist = await _tagRepository.GetTagByNameAsync(tag.TagName);
                 //var tagExist = await _dataContext.Tags.AsNoTracking().SingleOrDefaultAsync(x => x.Name == tag.TagName);
 
                 if (tagExist != null)

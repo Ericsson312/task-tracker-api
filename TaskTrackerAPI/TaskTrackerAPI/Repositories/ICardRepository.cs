@@ -7,8 +7,8 @@ namespace TaskTrackerApi.Repositories
 {
     public interface ICardRepository
     {
-        Task<List<Card>> GetCardsAsNoTrackingAsync();
-        Task<Card> GetCardByIdAsNoTrackingAsync(Guid cardId);
+        Task<List<Card>> GetCardsAsync();
+        Task<Card> GetCardByIdAsync(Guid cardId);
         Task<bool> CreateCardAsync(Card card);
         Task<bool> UpdateCardAsync(Card card);
         Task<bool> DeleteCardAsync(Card card);

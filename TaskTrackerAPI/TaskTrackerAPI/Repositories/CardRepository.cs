@@ -16,12 +16,12 @@ namespace TaskTrackerApi.Repositories
             _dataContext = dataContext;
         }
         
-        public async Task<List<Card>> GetCardsAsNoTrackingAsync()
+        public async Task<List<Card>> GetCardsAsync()
         {
             return await _dataContext.Cards.Include(x => x.Tags).AsNoTracking().ToListAsync();
         }
 
-        public async Task<Card> GetCardByIdAsNoTrackingAsync(Guid cardId)
+        public async Task<Card> GetCardByIdAsync(Guid cardId)
         {
             return await _dataContext.Cards
                 .Include(x => x.Tags)

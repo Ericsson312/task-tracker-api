@@ -16,12 +16,12 @@ namespace TaskTrackerApi.Repositories
             _dataContext = dataContext;
         }
         
-        public async Task<List<Member>> GetMembersAsNoTrackingAsync()
+        public async Task<List<Member>> GetMembersAsync()
         {
             return await _dataContext.Members.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Member> GetMemberAsNoTrackingAsync(string email)
+        public async Task<Member> GetMemberAsync(string email)
         {
             return await _dataContext.Members
                 .AsNoTracking()

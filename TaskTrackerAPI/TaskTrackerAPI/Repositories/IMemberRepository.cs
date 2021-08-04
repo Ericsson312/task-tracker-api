@@ -6,8 +6,8 @@ namespace TaskTrackerApi.Repositories
 {
     public interface IMemberRepository
     {
-        Task<List<Member>> GetMembersAsNoTrackingAsync();
-        Task<Member> GetMemberAsNoTrackingAsync(string email);
+        Task<List<Member>> GetMembersAsync();
+        Task<Member> GetMemberAsync(string email);
         Task<bool> DeleteMemberFromBoardAsync(Member member, Board board);
         Task<bool> AddMemberToBoardAsync(BoardMember boardMember);
     }
