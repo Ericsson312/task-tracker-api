@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskTrackerApi.Contracts;
 using TaskTrackerApi.Contracts.V1;
 using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Domain;
 using TaskTrackerApi.Extensions;
-using TaskTrackerApi.Repositories;
 using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Controllers.V1
@@ -49,12 +46,9 @@ namespace TaskTrackerApi.Controllers.V1
                         Id = x.Id,
                         UserId = x.UserId,
                         Name = x.Name,
-                        Tags = new List<TagResponse>()
+                        Tags = x.Tags?.Select(xx => new TagResponse{ Name = xx.TagName }).ToList(),
                     }).ToList(),
-                    Members = board.Members?.Select(x => new MemberResponse
-                    {
-                        Email = x.MemberEmail
-                    }).ToList()
+                    Members = board.Members?.Select(x => new MemberResponse{ Email = x.MemberEmail }).ToList()
                 });
             }
 
@@ -68,7 +62,7 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (!userBelongsToBoard)
             {
-                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not belong to the board"}));
+                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not belong to the board" }));
             }
             
             var board =  await _boardService.GetBoardByIdAsync(boardId);

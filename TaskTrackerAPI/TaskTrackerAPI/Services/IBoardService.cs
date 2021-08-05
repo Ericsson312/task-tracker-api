@@ -27,7 +27,6 @@ namespace TaskTrackerApi.Services
         Task<bool> CreateCardAsync(Card card);
         Task<bool> UpdateCardAsync(Card card);
         Task<bool> DeleteCardAsync(Guid cardId);
-        Task<bool> UserOwnsCardAsync(Guid cardId, string userId);
         
         #endregion
 

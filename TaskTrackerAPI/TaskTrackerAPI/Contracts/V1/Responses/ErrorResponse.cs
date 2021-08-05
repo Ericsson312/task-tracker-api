@@ -14,7 +14,7 @@ namespace TaskTrackerApi.Contracts.V1.Responses
 
         public ErrorResponse(ErrorModel errorModel)
         {
-                Errors.Add(errorModel);
+            Errors.Add(errorModel);
         }
         public List<ErrorModel> Errors { get; set; } = new List<ErrorModel>();
     }

@@ -8,6 +8,7 @@ namespace TaskTrackerApi.Repositories
     public interface IBoardRepository
     {
         Task<Board> GetBoardByIdAsync(Guid boardId);
+        Task<Board> GetBoardByCardIdAsync(Guid cardId);
         Task<List<Board>> GetBoardsAsync();
         Task<bool> CreateBoardAsync(Board board);
         Task<bool> UpdateBoardAsync(Board board);

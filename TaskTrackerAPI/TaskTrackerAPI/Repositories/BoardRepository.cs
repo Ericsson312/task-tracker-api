@@ -20,7 +20,11 @@ namespace TaskTrackerApi.Repositories
 
         public async Task<List<Board>> GetBoardsAsync()
         {
-            return await _dataContext.Boards.AsNoTracking().ToListAsync();
+            return await _dataContext.Boards
+                .Include(m => m.Members)
+                .Include(c => c.Cards)
+                .ThenInclude(card => card.Tags)
+                .AsNoTracking().ToListAsync();
         }
         
         public async Task<Board> GetBoardByIdAsync(Guid boardId)
@@ -31,6 +35,13 @@ namespace TaskTrackerApi.Repositories
                 .ThenInclude(card => card.Tags)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(x => x.Id == boardId);
+        }
+        
+        public async Task<Board> GetBoardByCardIdAsync(Guid cardId)
+        {
+            return await _dataContext.Boards.AsNoTracking()
+                .Include(c => c.Cards)
+                .SingleOrDefaultAsync(x => x.Cards.Exists(xx => xx.Id == cardId));
         }
 
         public async Task<bool> CreateBoardAsync(Board board)
