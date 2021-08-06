@@ -9,7 +9,6 @@ namespace TaskTrackerApi.Repositories
         Task<List<Tag>> GetTagsAsync();
         Task<Tag> GetTagByNameAsync(string tagName);
         Task<bool> AddTagAsync(Tag tag);
-        Task<bool> RemoveRangeCardTagsAsync(string tagName);
         Task<bool> RemoveTagAsync(Tag tag);
     }
 }

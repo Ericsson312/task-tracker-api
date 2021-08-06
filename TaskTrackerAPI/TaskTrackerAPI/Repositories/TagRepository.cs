@@ -36,21 +36,16 @@ namespace TaskTrackerApi.Repositories
             return created > 0;
         }
 
-        public async Task<bool> RemoveRangeCardTagsAsync(string tagName)
-        {
-            var cardTags = await _dataContext.CardTags.Where(x => x.TagName == tagName.ToLower()).ToListAsync();
-            _dataContext.CardTags.RemoveRange(cardTags);
-            var result = await _dataContext.SaveChangesAsync();
-
-            return result > 0;
-        }
-
         public async Task<bool> RemoveTagAsync(Tag tag)
         {
+            var cardTags = await _dataContext.CardTags.Where(x => x.TagName == tag.Name.ToLower()).ToListAsync();
+            
+            _dataContext.CardTags.RemoveRange(cardTags);
             _dataContext.Tags.Remove(tag);
+            
             var result = await _dataContext.SaveChangesAsync();
 
-            return result > 0;
+            return result > cardTags.Count;
         }
     }
 }

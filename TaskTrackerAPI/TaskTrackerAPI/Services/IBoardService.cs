@@ -10,9 +10,8 @@ namespace TaskTrackerApi.Services
         #region Board service
         
         Task<List<Board>> GetBoardsAsync();
-        Task<bool> CreateBoardAsync(string email, Board board);
+        Task<bool> CreateBoardAsync(Board board);
         Task<Board> GetBoardByIdAsync(Guid boardId);
-        Task<Board> GetBoardByCardIdAsync(Guid cardId);
         Task<bool> UpdateBoardAsync(Board board);
         Task<bool> DeleteBoardByIdAsync(Guid cardId);
         Task<bool> UserOwnsBoardAsync(Guid boardId, string userId);

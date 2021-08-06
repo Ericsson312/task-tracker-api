@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Data;
 using TaskTrackerApi.Domain;
 
@@ -24,7 +22,8 @@ namespace TaskTrackerApi.Repositories
                 .Include(m => m.Members)
                 .Include(c => c.Cards)
                 .ThenInclude(card => card.Tags)
-                .AsNoTracking().ToListAsync();
+                .AsNoTracking()
+                .ToListAsync();
         }
         
         public async Task<Board> GetBoardByIdAsync(Guid boardId)
@@ -33,7 +32,6 @@ namespace TaskTrackerApi.Repositories
                 .Include(m => m.Members)
                 .Include(c => c.Cards)
                 .ThenInclude(card => card.Tags)
-                .AsNoTracking()
                 .SingleOrDefaultAsync(x => x.Id == boardId);
         }
         
@@ -41,7 +39,7 @@ namespace TaskTrackerApi.Repositories
         {
             return await _dataContext.Boards.AsNoTracking()
                 .Include(c => c.Cards)
-                .SingleOrDefaultAsync(x => x.Cards.Exists(xx => xx.Id == cardId));
+                .FirstOrDefaultAsync(x => x.Cards.Exists(xx => xx.Id == cardId));
         }
 
         public async Task<bool> CreateBoardAsync(Board board)

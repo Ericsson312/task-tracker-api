@@ -8,7 +8,7 @@ namespace TaskTrackerApi.Repositories
     {
         Task<List<Member>> GetMembersAsync();
         Task<Member> GetMemberAsync(string email);
-        Task<bool> DeleteMemberFromBoardAsync(Member member, Board board);
-        Task<bool> AddMemberToBoardAsync(BoardMember boardMember);
+        Task<bool> DeleteMemberFromBoardAsync(BoardMember boardMember);
+        Task<bool> AddMemberToBoardAsync(Member member, Board board);
     }
 }

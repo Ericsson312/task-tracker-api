@@ -12,7 +12,8 @@ namespace TaskTrackerApi.Validators
                 .Matches("^[a-zA-Z0-9 ]*$");
             
             RuleFor(x => x.Description)
-                .Matches("^[a-zA-Z0-9 ]*$");
+                .NotNull()
+                .NotEmpty();
         }
     }
 }

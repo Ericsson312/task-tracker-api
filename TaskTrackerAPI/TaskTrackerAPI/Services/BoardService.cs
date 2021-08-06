@@ -35,16 +35,9 @@ namespace TaskTrackerApi.Services
              return await _boardRepository.GetBoardByIdAsync(boardId);
          }
 
-         public async Task<Board> GetBoardByCardIdAsync(Guid cardId)
-         {
-             return await _boardRepository.GetBoardByCardIdAsync(cardId);
-         }
-
-         public async Task<bool> CreateBoardAsync(string email, Board board)
+         public async Task<bool> CreateBoardAsync(Board board)
         {
-            var boardCreated = await _boardRepository.CreateBoardAsync(board);
-            var memberAdded = await AddMemberToBoardAsync(email, board);
-            return boardCreated && memberAdded;
+            return await _boardRepository.CreateBoardAsync(board);;
         }
 
         public async Task<bool> UpdateBoardAsync(Board board)
@@ -118,7 +111,14 @@ namespace TaskTrackerApi.Services
                 return true;
             }
 
-            return await _memberRepository.DeleteMemberFromBoardAsync(memberToDelete, board);
+            var boardMember = board.Members.Find(x => x.MemberEmail == memberToDelete.Email);
+            
+            if (boardMember == null)
+            {
+                return true;
+            }
+
+            return await _memberRepository.DeleteMemberFromBoardAsync(boardMember);
         }
         
         public async Task<bool> AddMemberToBoardAsync(string email, Board board)
@@ -130,20 +130,14 @@ namespace TaskTrackerApi.Services
                 return false;
             }
 
-            if (board.Members.SingleOrDefault(x => x.MemberEmail == email) != null)
+            var boardMember = board.Members?.SingleOrDefault(x => x.MemberEmail == email);
+            
+            if (boardMember != null)
             {
                 return true;
             }
-            
-            var boardMember = new BoardMember
-            {
-                Board = board,
-                Member = memberToAdd,
-                BoardId = board.Id,
-                MemberEmail = memberToAdd.Email
-            };
 
-            return await _memberRepository.AddMemberToBoardAsync(boardMember);
+            return await _memberRepository.AddMemberToBoardAsync(memberToAdd, board);
         }
 
         #endregion
@@ -174,6 +168,12 @@ namespace TaskTrackerApi.Services
 
         public async Task<bool> UpdateCardAsync(Card card)
         {
+            if (card.Tags != null)
+            {
+                card.Tags?.ForEach(x => x.TagName = x.TagName.ToLower());
+                await AddNewTag(card);   
+            }
+            
             return await _cardRepository.UpdateCardAsync(card);
         }
 
@@ -231,9 +231,8 @@ namespace TaskTrackerApi.Services
                 return true;
             }
 
-            var removeCardTagsResult = await _tagRepository.RemoveRangeCardTagsAsync(tagName.ToLower());
             var removeTagResult = await _tagRepository.RemoveTagAsync(tag);
-            return removeCardTagsResult && removeTagResult;
+            return removeTagResult;
         }
         
         #endregion

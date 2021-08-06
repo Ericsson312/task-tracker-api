@@ -92,7 +92,9 @@ namespace TaskTrackerApi.Controllers.V1
         [HttpPut(ApiRoutes.Boards.Update)]
         public async Task<IActionResult> UpdateAsync([FromRoute] Guid boardId, [FromBody] UpdateBoardRequest boardRequest)
         {
-            var userOwnsBoard = await _boardService.UserOwnsBoardAsync(boardId, HttpContext.GetUserId());
+            var userId = HttpContext.GetUserId();
+            
+            var userOwnsBoard = await _boardService.UserOwnsBoardAsync(boardId, userId);
 
             if (!userOwnsBoard)
             {
@@ -100,8 +102,16 @@ namespace TaskTrackerApi.Controllers.V1
             }
 
             var boardToUpdate = await _boardService.GetBoardByIdAsync(boardId);
-            boardToUpdate.Name = boardRequest.Name;
-            boardToUpdate.Description = boardRequest.Description;
+
+            if (!string.IsNullOrEmpty(boardRequest.Name))
+            {
+                boardToUpdate.Name = boardRequest.Name;
+            }
+
+            if (!string.IsNullOrEmpty(boardRequest.Description))
+            {
+                boardToUpdate.Description = boardRequest.Description;
+            }
 
             var updated = await _boardService.UpdateBoardAsync(boardToUpdate);
 
@@ -131,16 +141,22 @@ namespace TaskTrackerApi.Controllers.V1
         public async Task <IActionResult> CreateAsync([FromBody] CreateBoardRequest boardRequest)
         {
             var newBoardId = Guid.NewGuid();
+            var userId = HttpContext.GetUserId();
+            var memberEmail = HttpContext.GetUserEmail();
 
             var board = new Board
             {
                 Id = newBoardId,
                 Name = boardRequest.Name,
                 Description = boardRequest.Description,
-                UserId = HttpContext.GetUserId()
+                UserId = userId,
+                Members = new List<BoardMember>
+                {
+                    new BoardMember(){ MemberEmail = memberEmail, BoardId = newBoardId }
+                }
             };
 
-            await _boardService.CreateBoardAsync(HttpContext.GetUserEmail(), board);
+            await _boardService.CreateBoardAsync(board);
 
             var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
             var location = $"{baseUrl}/{ApiRoutes.Boards.Get.Replace("{boardId}", board.Id.ToString())}";
@@ -152,7 +168,7 @@ namespace TaskTrackerApi.Controllers.V1
                 Name = board.Name,
                 Description = board.Description,
                 Cards = new List<CardResponse>(),
-                Members = new List<MemberResponse>()
+                Members = board.Members.Select(x => new MemberResponse{ Email = x.MemberEmail })
             };
             
             return Created(location, response);

@@ -2,10 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TaskTrackerApi.Contracts;
 using TaskTrackerApi.Contracts.V1;
 using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
@@ -68,9 +66,8 @@ namespace TaskTrackerApi.Controllers.V1
             {
                 return NotFound(new ErrorResponse(new ErrorModel{ Message = "Invalid card id"}));
             }
-
-            var board = await _boardService.GetBoardByCardIdAsync(cardId);
-            var userBelongsToBoard = await _boardService.UserBelongsToBoard(board.Id, HttpContext.GetUserEmail());
+            
+            var userBelongsToBoard = await _boardService.UserBelongsToBoard(cardToUpdate.BoardId, HttpContext.GetUserEmail());
 
             if (!userBelongsToBoard)
             {
@@ -88,7 +85,7 @@ namespace TaskTrackerApi.Controllers.V1
                     Id = cardToUpdate.Id,
                     Name = cardToUpdate.Name,
                     UserId = cardToUpdate.UserId,
-                    Tags = cardToUpdate.Tags.Select(x => new TagResponse { Name = x.TagName }).ToList()
+                    Tags = cardToUpdate.Tags?.Select(x => new TagResponse { Name = x.TagName }).ToList()
                 });
             }
 
@@ -143,8 +140,14 @@ namespace TaskTrackerApi.Controllers.V1
         [HttpDelete(ApiRoutes.Cards.Delete)]
         public async Task<IActionResult> DeleteAsync([FromRoute] Guid cardId)
         {
-            var board = await _boardService.GetBoardByCardIdAsync(cardId);
-            var userBelongsToBoard = await _boardService.UserBelongsToBoard(board.Id, HttpContext.GetUserEmail());
+            var cardToDelete = await _boardService.GetCardByIdAsync(cardId);
+
+            if (cardToDelete == null)
+            {
+                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "There is no card with such id"}));
+            }
+            
+            var userBelongsToBoard = await _boardService.UserBelongsToBoard(cardToDelete.BoardId, HttpContext.GetUserEmail());
 
             if (!userBelongsToBoard)
             {

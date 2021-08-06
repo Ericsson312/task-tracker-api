@@ -25,8 +25,8 @@ namespace TaskTrackerApi.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.Entity<CardTag>().Ignore(xx => xx.Card).HasKey(x => new {x.CardId, x.TagName });
-            builder.Entity<BoardMember>().Ignore(xx => xx.Board).HasKey(x => new {x.BoardId, x.MemberEmail });
+            builder.Entity<CardTag>().Ignore(xx => xx.Card).HasKey(x => new { x.CardId, x.TagName });
+            builder.Entity<BoardMember>().Ignore(xx => xx.Board).HasKey(x => new { x.BoardId, x.MemberEmail });
         }
     }
 }
