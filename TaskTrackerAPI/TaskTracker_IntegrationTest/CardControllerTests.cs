@@ -18,7 +18,7 @@ namespace TaskTracker_IntegrationTest
         [Fact]
         public async Task GetAll_WithoutAnyCard_ReturnEmptyResponse()
         {
-            // Arrage
+            // Arrange
             await AuthenticateAsync();
 
             // Act
@@ -32,7 +32,7 @@ namespace TaskTracker_IntegrationTest
         [Fact]
         public async Task Get_WhenCardExistsInTheDatabase_ReturnsCard()
         {
-            // Arrage
+            // Arrange
             await AuthenticateAsync();
 
             // Act
@@ -53,7 +53,7 @@ namespace TaskTracker_IntegrationTest
         [Fact]
         public async Task Delete_WhenCardExistsInDatabase_ReturnsNoContentStatusCode()
         {
-            // Arrage
+            // Arrange
             await AuthenticateAsync();
 
             // Act
@@ -73,7 +73,7 @@ namespace TaskTracker_IntegrationTest
         [Fact]
         public async Task Update_WhenCardExistsInDatabase_ReturnsUpdatedCard()
         {
-            // Arrage
+            // Arrange
             await AuthenticateAsync();
 
             // Act

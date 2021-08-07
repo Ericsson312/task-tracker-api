@@ -15,6 +15,7 @@ using TaskTrackerApi.Services;
 namespace TaskTrackerApi.Controllers.V1
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Produces("application/json")]
     public class BoardController : Controller
     {
         private readonly IBoardService _boardService;
@@ -24,9 +25,14 @@ namespace TaskTrackerApi.Controllers.V1
             _boardService = boardService;
         }
         
+        /// <summary>
+        /// Returns all the boards in the system
+        /// </summary>
+        /// <response code="200">Returns all the boards in the system</response>
         [HttpGet(ApiRoutes.Boards.GetAll)]
         //[Authorize(Roles = "Admin")]
         //[Authorize(Roles = "Moderator")]
+        [ProducesResponseType(typeof(BoardResponse), 200)]
         public async Task<IActionResult> GetAllAsync()
         {
             var boards =  await _boardService.GetBoardsAsync();
@@ -55,14 +61,22 @@ namespace TaskTrackerApi.Controllers.V1
             return Ok(boardResponses);
         }
         
+        /// <summary>
+        /// Returns a certain board in the system
+        /// </summary>
+        /// <response code="200">Returns a certain board in the system</response>
+        /// <response code="400">Unable to get board due to validation error</response>
+        /// <response code="404">Unable to find board</response>
         [HttpGet(ApiRoutes.Boards.Get)]
+        [ProducesResponseType(typeof(BoardResponse), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
         public async Task<IActionResult> GetAsync([FromRoute] Guid boardId)
         {
             var userBelongsToBoard = await _boardService.UserBelongsToBoard(boardId, HttpContext.GetUserEmail());
 
             if (!userBelongsToBoard)
             {
-                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not belong to the board" }));
+                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "You do not belong to the board" } }});
             }
             
             var board =  await _boardService.GetBoardByIdAsync(boardId);
@@ -89,7 +103,15 @@ namespace TaskTrackerApi.Controllers.V1
             });
         }
         
+        /// <summary>
+        /// Updates name and description of selected board
+        /// </summary>
+        /// <response code="200">Updates name and description of selected board</response>
+        /// <response code="400">Unable to update board due to validation error</response>
+        /// <response code="404">Unable to find board</response>
         [HttpPut(ApiRoutes.Boards.Update)]
+        [ProducesResponseType(typeof(BoardResponse), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
         public async Task<IActionResult> UpdateAsync([FromRoute] Guid boardId, [FromBody] UpdateBoardRequest boardRequest)
         {
             var userId = HttpContext.GetUserId();
@@ -98,7 +120,7 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (!userOwnsBoard)
             {
-                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not own this board"}));
+                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "You do not own this board" } }});
             }
 
             var boardToUpdate = await _boardService.GetBoardByIdAsync(boardId);
@@ -137,7 +159,12 @@ namespace TaskTrackerApi.Controllers.V1
             return NotFound();
         }
         
+        /// <summary>
+        /// Creates new board in the system
+        /// </summary>
+        /// <response code="201">Creates new board in the system</response>
         [HttpPost(ApiRoutes.Boards.Create)]
+        [ProducesResponseType(typeof(BoardResponse), 201)]
         public async Task <IActionResult> CreateAsync([FromBody] CreateBoardRequest boardRequest)
         {
             var newBoardId = Guid.NewGuid();
@@ -152,7 +179,7 @@ namespace TaskTrackerApi.Controllers.V1
                 UserId = userId,
                 Members = new List<BoardMember>
                 {
-                    new BoardMember(){ MemberEmail = memberEmail, BoardId = newBoardId }
+                    new BoardMember{ MemberEmail = memberEmail, BoardId = newBoardId }
                 }
             };
 
@@ -174,14 +201,21 @@ namespace TaskTrackerApi.Controllers.V1
             return Created(location, response);
         }
         
+        /// <summary>
+        /// Deletes board from the system
+        /// </summary>
+        /// <response code="204">Deletes board from the system</response>
+        /// <response code="400">Unable to delete board due to validation error</response>
+        /// <response code="404">Unable to find board</response>
         [HttpDelete(ApiRoutes.Boards.Delete)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
         public async Task<IActionResult> DeleteAsync([FromRoute] Guid boardId)
         {
             var userOwnsBoard = await _boardService.UserOwnsBoardAsync(boardId, HttpContext.GetUserId());
 
             if (!userOwnsBoard)
             {
-                return BadRequest(new ErrorResponse(new ErrorModel{ Message = "You do not own this board"}));
+                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "You do not own this board" } }});
             }
 
             var deleted = await _boardService.DeleteBoardByIdAsync(boardId);
