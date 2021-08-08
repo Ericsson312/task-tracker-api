@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TaskTrackerApi.Contracts.V1.Responses
 {
-    public class AuthFailedRespose
+    public class AuthFailedResponse
     {
         public IEnumerable<string> Errors { get; set; }
     }

@@ -64,11 +64,11 @@ namespace TaskTrackerApi.Controllers.V1
         }
         
         /// <summary>
-        /// Adds new member to a board in the system
+        /// Creates new member for the board in the system
         /// </summary>
-        /// <response code="204">Adds new member to a board in the system</response>
-        /// <response code="400">Unable to add member due to validation error</response>
-        /// <response code="404">Unable to add member</response>
+        /// <response code="204">Creates new member for the board in the system</response>
+        /// <response code="400">Unable to create member due to validation error</response>
+        /// <response code="404">Unable to create member</response>
         [HttpPost(ApiRoutes.Members.Create)]
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         public async Task<IActionResult> CreateAsync([FromRoute] Guid boardId, [FromBody] CreateMemberRequest memberRequest)
@@ -77,7 +77,10 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (boardToUpdate == null)
             {
-                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Failed to add new member" } }});
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to create member due to validation error" } }
+                });
             }
             
             var created = await _boardService.AddMemberToBoardAsync(memberRequest.Email, boardToUpdate);
@@ -91,9 +94,9 @@ namespace TaskTrackerApi.Controllers.V1
         }
         
         /// <summary>
-        /// Deletes a member from board
+        /// Deletes a member from board in the system
         /// </summary>
-        /// <response code="204">Deletes a member from board</response>
+        /// <response code="204">Deletes a member from board in the system</response>
         /// <response code="404">Unable to delete member from board</response>
         /// <response code="400">Unable to delete member due to validation error</response>
         [HttpDelete(ApiRoutes.Members.Delete)]
@@ -104,12 +107,18 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (boardToUpdate == null)
             {
-                return NotFound(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "The board does not exist" } }});
+                return NotFound(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to delete member from board" } }
+                });
             }
 
             if (!await _boardService.UserOwnsBoardAsync(boardId, HttpContext.GetUserId()))
             {
-                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Only board owners can exclude members" } }});
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to delete member due to validation error" } }
+                });
             }
             
             var deleted = await _boardService.DeleteMemberFromBoardAsync(memberRequest.Email, boardToUpdate);

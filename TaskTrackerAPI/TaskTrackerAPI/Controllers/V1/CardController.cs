@@ -71,54 +71,10 @@ namespace TaskTrackerApi.Controllers.V1
         }
 
         /// <summary>
-        /// Updates name of selected card
+        /// Creates new card for the board in the system
         /// </summary>
-        /// <response code="200">Updates name of the selected card</response>
-        /// <response code="404">Unable to find card</response>
-        /// <response code="400">Unable to update card due to validation error</response>
-        [HttpPut(ApiRoutes.Cards.Update)]
-        [ProducesResponseType(typeof(CardResponse), 200)]
-        [ProducesResponseType(typeof(ErrorResponse), 404)]
-        [ProducesResponseType(typeof(ErrorResponse), 400)]
-        public async Task<IActionResult> UpdateAsync([FromRoute] Guid cardId, [FromBody] UpdateCardRequest cardRequest)
-        {
-            var cardToUpdate = await _boardService.GetCardByIdAsync(cardId);
-
-            if (cardToUpdate == null)
-            {
-                return NotFound(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Invalid card id" } }});
-            }
-            
-            var userBelongsToBoard = await _boardService.UserBelongsToBoard(cardToUpdate.BoardId, HttpContext.GetUserEmail());
-
-            if (!userBelongsToBoard)
-            {
-                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "You do not have permission to change this card" } }});
-            }
-            
-            cardToUpdate.Name = cardRequest.Name;
-
-            var updated = await _boardService.UpdateCardAsync(cardToUpdate);
-
-            if (updated)
-            {
-                return Ok(new CardResponse
-                {
-                    Id = cardToUpdate.Id,
-                    Name = cardToUpdate.Name,
-                    UserId = cardToUpdate.UserId,
-                    Tags = cardToUpdate.Tags?.Select(x => new TagResponse { Name = x.TagName }).ToList()
-                });
-            }
-
-            return NotFound();
-        }
-
-        /// <summary>
-        /// Creates new card in the system
-        /// </summary>
-        /// <response code="201">Creates new card in the system</response>
-        /// <response code="404">Unable to find card</response>
+        /// <response code="201">Creates new card for the board in the system</response>
+        /// <response code="404">Unable to find board for new card</response>
         /// <response code="400">Unable to create card due to validation error</response>
         [HttpPost(ApiRoutes.Cards.Create)]
         [ProducesResponseType(typeof(CardResponse), 200)]
@@ -130,14 +86,20 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (board == null)
             {
-                return NotFound(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Invalid card id" } }});
+                return NotFound(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to find board for new card" } }
+                });
             }
             
             var userBelongsToBoard = await _boardService.UserBelongsToBoard(boardId, HttpContext.GetUserEmail());
 
             if (!userBelongsToBoard)
             {
-                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "You do not have permission to add new card" } }});
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to create card due to validation error" } }
+                });
             }
             
             var newCardId = Guid.NewGuid();
@@ -167,11 +129,61 @@ namespace TaskTrackerApi.Controllers.V1
 
             return Created(location, response);
         }
+        
+        /// <summary>
+        /// Updates name of the selected card
+        /// </summary>
+        /// <response code="200">Updates name of the selected card</response>
+        /// <response code="404">Unable to find card</response>
+        /// <response code="400">Unable to update card due to validation error</response>
+        [HttpPut(ApiRoutes.Cards.Update)]
+        [ProducesResponseType(typeof(CardResponse), 200)]
+        [ProducesResponseType(typeof(ErrorResponse), 404)]
+        [ProducesResponseType(typeof(ErrorResponse), 400)]
+        public async Task<IActionResult> UpdateAsync([FromRoute] Guid cardId, [FromBody] UpdateCardRequest cardRequest)
+        {
+            var cardToUpdate = await _boardService.GetCardByIdAsync(cardId);
+
+            if (cardToUpdate == null)
+            {
+                return NotFound(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to find card to update" } }
+                });
+            }
+            
+            var userBelongsToBoard = await _boardService.UserBelongsToBoard(cardToUpdate.BoardId, HttpContext.GetUserEmail());
+
+            if (!userBelongsToBoard)
+            {
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to update card due to validation error" } }
+                });
+            }
+            
+            cardToUpdate.Name = cardRequest.Name;
+
+            var updated = await _boardService.UpdateCardAsync(cardToUpdate);
+
+            if (updated)
+            {
+                return Ok(new CardResponse
+                {
+                    Id = cardToUpdate.Id,
+                    Name = cardToUpdate.Name,
+                    UserId = cardToUpdate.UserId,
+                    Tags = cardToUpdate.Tags?.Select(x => new TagResponse { Name = x.TagName }).ToList()
+                });
+            }
+
+            return NotFound();
+        }
 
         /// <summary>
-        /// Deletes card from the system
+        /// Deletes card from the board from the system
         /// </summary>
-        /// <response code="204">Deletes card from the system</response>
+        /// <response code="204">Deletes card from the board from the system</response>
         /// <response code="404">Unable to find card</response>
         /// <response code="400">Unable to delete card due to validation error</response>
         [HttpDelete(ApiRoutes.Cards.Delete)]
@@ -182,14 +194,20 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (cardToDelete == null)
             {
-                return NotFound(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "There is no card with such id" } }});
+                return NotFound(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to find card" } }
+                });
             }
             
             var userBelongsToBoard = await _boardService.UserBelongsToBoard(cardToDelete.BoardId, HttpContext.GetUserEmail());
 
             if (!userBelongsToBoard)
             {
-                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "You do not have permission to change this card" } }});
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to delete card due to validation error" } }
+                });
             }
 
             var deleted = await _boardService.DeleteCardAsync(cardId);
@@ -199,7 +217,7 @@ namespace TaskTrackerApi.Controllers.V1
                 return NoContent();
             }
 
-            return NotFound(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "There is no card with such id" } }});
+            return NotFound();
         }
     }
 }

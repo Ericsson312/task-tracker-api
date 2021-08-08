@@ -76,7 +76,10 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (!userBelongsToBoard)
             {
-                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "You do not belong to the board" } }});
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to get board due to validation error" } }
+                });
             }
             
             var board =  await _boardService.GetBoardByIdAsync(boardId);
@@ -104,9 +107,9 @@ namespace TaskTrackerApi.Controllers.V1
         }
         
         /// <summary>
-        /// Updates name and description of selected board
+        /// Updates name and description of the selected board
         /// </summary>
-        /// <response code="200">Updates name and description of selected board</response>
+        /// <response code="200">Updates name and description of the selected board</response>
         /// <response code="400">Unable to update board due to validation error</response>
         /// <response code="404">Unable to find board</response>
         [HttpPut(ApiRoutes.Boards.Update)]
@@ -120,7 +123,10 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (!userOwnsBoard)
             {
-                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "You do not own this board" } }});
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to update board due to validation error" } }
+                });
             }
 
             var boardToUpdate = await _boardService.GetBoardByIdAsync(boardId);
@@ -215,7 +221,10 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (!userOwnsBoard)
             {
-                return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "You do not own this board" } }});
+                return BadRequest(new ErrorResponse
+                {
+                    Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to delete board due to validation error" } }
+                });
             }
 
             var deleted = await _boardService.DeleteBoardByIdAsync(boardId);
