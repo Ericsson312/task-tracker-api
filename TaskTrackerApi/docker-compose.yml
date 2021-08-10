@@ -12,17 +12,24 @@ services:
             - "7000:80"
         depends_on:
             - db-server
+            - redis
         networks:
             - localdev
     db-server:
-        image: microsoft/mssql-server-linux:2017-latest
+        image: mcr.microsoft.com/mssql/server:2017-latest
         container_name: db_server
-        environment:
-            - ACCEPT_EULA=Y
-            - MSSQL_SA_PASSWORD=SuperDuperPassword12345!
-            - MSSQL_TCP_PORT=1433
         ports:
-        - "1400:1433"
+            - "1400:1433"
+        environment:
+            SA_PASSWORD: "SuperDuperPassword123456!"
+            ACCEPT_EULA: "Y"
         networks:
-        - localdev
+            - localdev
+    redis:
+        image: redis
+        container_name: redis
+        ports:
+            - "6379:6379"
+        networks:
+            - localdev
   

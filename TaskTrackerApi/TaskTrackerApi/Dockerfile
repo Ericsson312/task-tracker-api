@@ -1,5 +1,5 @@
 # specify the target SDK (base image)
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 
 ARG BUILDCONFIG=RELEASE
 ARG VERSION=1.0.0
@@ -17,7 +17,7 @@ WORKDIR /build/
 # publish API
 RUN dotnet publish ./TaskTrackerApi.csproj -c $BUILDCONFIG -o out /p:Version=$VERSION
 
-FROM microsoft/dotnet:2.2-aspnetcore-runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 WORKDIR /app
 COPY --from=build /build/out .
 
