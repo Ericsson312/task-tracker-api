@@ -2,7 +2,7 @@
 using Swashbuckle.AspNetCore.Filters;
 using TaskTrackerApi.Contracts.V1.Requests;
 
-namespace TaskTrackerApi.Examples.Requests
+namespace TaskTrackerApi.Examples.V1.Requests
 {
     public class CreateCardRequestExample : IExamplesProvider<CreateCardRequest>
     {

@@ -9,6 +9,7 @@ using TaskTrackerApi.Contracts.V1;
 using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Domain;
+using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
 using TaskTrackerApi.Services;
 
@@ -40,9 +41,9 @@ namespace TaskTrackerApi.Controllers.V1
                 Name = x.Name,
                 UserId = x.UserId,
                 Tags = x.Tags.Select(xx => new TagResponse { Name = xx.TagName }).ToList()
-            });
+            }).ToList();
 
-            return Ok(cardResponse);
+            return Ok(new Response<List<CardResponse>>(cardResponse));
         }
 
         /// <summary>
@@ -61,13 +62,13 @@ namespace TaskTrackerApi.Controllers.V1
                 return NotFound();
             }
 
-            return Ok(new CardResponse 
+            return Ok(new Response<CardResponse>(new CardResponse 
             {
                 Id = card.Id,
                 Name = card.Name,
                 UserId = card.UserId,
                 Tags = card.Tags.Select(x => new TagResponse { Name = x.TagName }).ToList()
-            });
+            }));
         }
 
         /// <summary>
@@ -127,7 +128,7 @@ namespace TaskTrackerApi.Controllers.V1
                 Tags = card.Tags?.Select(x => new TagResponse { Name = x.TagName }).ToList()
             };
 
-            return Created(location, response);
+            return Created(location, new Response<CardResponse>(response));
         }
         
         /// <summary>
@@ -168,13 +169,13 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (updated)
             {
-                return Ok(new CardResponse
+                return Ok(new Response<CardResponse>(new CardResponse
                 {
                     Id = cardToUpdate.Id,
                     Name = cardToUpdate.Name,
                     UserId = cardToUpdate.UserId,
                     Tags = cardToUpdate.Tags?.Select(x => new TagResponse { Name = x.TagName }).ToList()
-                });
+                }));
             }
 
             return NotFound();

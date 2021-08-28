@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskTrackerApi.Contracts.V1;
 using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
+using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
 using TaskTrackerApi.Services;
 
@@ -36,9 +37,9 @@ namespace TaskTrackerApi.Controllers.V1
             var memberResponse = members.Select(x => new MemberResponse
             {
                 Email = x.Email
-            });
+            }).ToList();
 
-            return Ok(memberResponse);
+            return Ok(new Response<List<MemberResponse>>(memberResponse));
         }
         
         /// <summary>
@@ -57,10 +58,10 @@ namespace TaskTrackerApi.Controllers.V1
                 return NotFound();
             }
 
-            return Ok(new MemberResponse
+            return Ok(new Response<MemberResponse>(new MemberResponse
             {
                 Email = member.Email
-            });
+            }));
         }
         
         /// <summary>

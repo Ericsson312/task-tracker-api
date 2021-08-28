@@ -5,11 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TaskTrackerApi.Cache;
 using TaskTrackerApi.Contracts.V1;
 using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Domain;
+using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
+using TaskTrackerApi.Repositories;
 using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Controllers.V1
@@ -30,15 +33,16 @@ namespace TaskTrackerApi.Controllers.V1
         /// <response code="200">Returns all the tags in the system</response>
         [HttpGet(ApiRoutes.Tags.GetAll)]
         [ProducesResponseType(typeof(TagResponse), 200)]
+        [Cached(600)]
         public async Task<IActionResult> GetAllAsync()
         {
             var tags = await _taskService.GetTagsAsync();
             var tagResponses = tags.Select(x => new TagResponse
             {
                 Name = x.Name
-            });
+            }).ToList();
 
-            return Ok(tagResponses);
+            return Ok(new Response<List<TagResponse>>(tagResponses));
         }
 
         /// <summary>
@@ -48,6 +52,7 @@ namespace TaskTrackerApi.Controllers.V1
         /// <response code="404">Unable to get tag by passed name</response>
         [HttpGet(ApiRoutes.Tags.Get)]
         [ProducesResponseType(typeof(TagResponse), 200)]
+        [Cached(600)]
         public async Task<IActionResult> GetAsync([FromRoute] string tagName)
         {
             var tag = await _taskService.GetTagByNameAsync(tagName);
@@ -57,7 +62,10 @@ namespace TaskTrackerApi.Controllers.V1
                 return NotFound();
             }
 
-            return Ok(new TagResponse { Name = tag.Name });
+            return Ok(new Response<TagResponse>(new TagResponse
+            {
+                Name = tag.Name
+            }));
         }
 
         /// <summary>
@@ -70,7 +78,7 @@ namespace TaskTrackerApi.Controllers.V1
         [ProducesResponseType(typeof(ErrorResponse), 400)]
         public async Task<IActionResult> CreateAsync([FromBody] CreateTagRequest request)
         {
-            var newTag = new Tag
+            var newTag = new Tag 
             {
                 Name = request.Name,
                 CreatorId = HttpContext.GetUserId(),
@@ -89,7 +97,7 @@ namespace TaskTrackerApi.Controllers.V1
 
             var response = new TagResponse { Name = newTag.Name };
 
-            return Created(location, response);
+            return Created(location, new Response<TagResponse>(response));
         }
 
         /// <summary>

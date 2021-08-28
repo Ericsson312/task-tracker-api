@@ -9,6 +9,7 @@ using TaskTrackerApi.Contracts.V1;
 using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Domain;
+using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
 using TaskTrackerApi.Services;
 
@@ -58,7 +59,7 @@ namespace TaskTrackerApi.Controllers.V1
                 });
             }
 
-            return Ok(boardResponses);
+            return Ok(new Response<List<BoardResponse>>(boardResponses));
         }
         
         /// <summary>
@@ -89,7 +90,7 @@ namespace TaskTrackerApi.Controllers.V1
                 return NotFound();
             }
 
-            return Ok(new BoardResponse
+            return Ok(new Response<BoardResponse>(new BoardResponse
             {
                 Id = board.Id,
                 UserId = board.UserId,
@@ -103,7 +104,7 @@ namespace TaskTrackerApi.Controllers.V1
                     Tags = x.Tags?.Select(xx => new TagResponse{ Name = xx.TagName }).ToList()
                 }).ToList(),
                 Members = board.Members?.Select(x => new MemberResponse{ Email = x.MemberEmail }).ToList()
-            });
+            }));
         }
         
         /// <summary>
@@ -145,7 +146,7 @@ namespace TaskTrackerApi.Controllers.V1
 
             if (updated)
             {
-                return Ok(new BoardResponse
+                return Ok(new Response<BoardResponse>(new BoardResponse
                 {
                     Id = boardToUpdate.Id,
                     UserId = boardToUpdate.UserId,
@@ -159,7 +160,7 @@ namespace TaskTrackerApi.Controllers.V1
                         Tags = x.Tags.Select(xx => new TagResponse{ Name = xx.TagName }).ToList()
                     }).ToList(),
                     Members = boardToUpdate.Members.Select(xx => new MemberResponse{ Email = xx.MemberEmail }).ToList()
-                });
+                }));
             }
 
             return NotFound();
@@ -204,7 +205,7 @@ namespace TaskTrackerApi.Controllers.V1
                 Members = board.Members.Select(x => new MemberResponse{ Email = x.MemberEmail })
             };
             
-            return Created(location, response);
+            return Created(location, new Response<BoardResponse>(response));
         }
         
         /// <summary>
