@@ -9,7 +9,7 @@ namespace TaskTrackerApi.Services
     {
         #region Board service
         
-        Task<List<Board>> GetBoardsAsync();
+        Task<List<Board>> GetBoardsAsync(PaginationFilter paginationFilter);
         Task<bool> CreateBoardAsync(Board board);
         Task<Board> GetBoardByIdAsync(Guid boardId);
         Task<bool> UpdateBoardAsync(Board board);
@@ -20,8 +20,7 @@ namespace TaskTrackerApi.Services
         #endregion
         
         #region Card service
-        
-        Task<List<Card>> GetCardsAsync();
+        Task<List<Card>> GetCardsAsync(PaginationFilter paginationFilter);
         Task<Card> GetCardByIdAsync(Guid cardId);
         Task<bool> CreateCardAsync(Card card);
         Task<bool> UpdateCardAsync(Card card);
@@ -31,7 +30,7 @@ namespace TaskTrackerApi.Services
 
         #region Tag service
         
-        Task<List<Tag>> GetTagsAsync();
+        Task<List<Tag>> GetTagsAsync(PaginationFilter paginationFilter);
         Task<Tag> GetTagByNameAsync(string tagName);
         Task<bool> CreateTagAsync(Tag tag);
         Task<bool> DeleteTagAsync(string tagName);
@@ -40,7 +39,7 @@ namespace TaskTrackerApi.Services
 
         #region Member service
 
-        Task<List<Member>> GetMembersAsync();
+        Task<List<Member>> GetMembersAsync(PaginationFilter paginationFilter);
         Task<Member> GetMemberAsync(string email);
         Task<bool> DeleteMemberFromBoardAsync(string email, Board board);
         Task<bool> AddMemberToBoardAsync(string email, Board board);

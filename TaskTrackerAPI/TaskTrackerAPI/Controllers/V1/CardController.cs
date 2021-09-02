@@ -9,6 +9,7 @@ using TaskTrackerApi.Contracts.V1;
 using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Domain;
+using TaskTrackerApi.Examples.V1.Requests.Queries;
 using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
 using TaskTrackerApi.Services;
@@ -32,10 +33,20 @@ namespace TaskTrackerApi.Controllers.V1
         /// <response code="200">Returns all the cards in the system</response>
         [HttpGet(ApiRoutes.Cards.GetAll)]
         [ProducesResponseType(typeof(CardResponse), 200)]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync([FromQuery] PaginationQuery paginationQuery)
         {
-            var cards = await _boardService.GetCardsAsync();
-            var cardResponse = cards.Select(x => new CardResponse
+            var pageNumber = paginationQuery.PageNumber;
+            var pageSize = paginationQuery.PageSize;
+            
+            var filter = new PaginationFilter
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var cards = await _boardService.GetCardsAsync(filter);
+            
+            var cardResponses = cards.Select(x => new CardResponse
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -43,7 +54,15 @@ namespace TaskTrackerApi.Controllers.V1
                 Tags = x.Tags.Select(xx => new TagResponse { Name = xx.TagName }).ToList()
             }).ToList();
 
-            return Ok(new Response<List<CardResponse>>(cardResponse));
+            var pagedResponse = new PagedResponse<CardResponse>
+            {
+                Data = cardResponses,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                ElementsCont = cards.Count
+            };
+
+            return Ok(pagedResponse);
         }
 
         /// <summary>

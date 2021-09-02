@@ -44,11 +44,18 @@ namespace TaskTracker_Moq
                     Description = "Test Description"
                 }
             };
-            _boardRepository.Setup(x => x.GetBoardsAsync())
+
+            var paginationFilter = new PaginationFilter
+            {
+                PageNumber = 1,
+                PageSize = 10
+            };
+            
+            _boardRepository.Setup(x => x.GetBoardsAsync(paginationFilter))
                 .ReturnsAsync(boardList);
                 
             // Act
-            var boards = await _sut.GetBoardsAsync();
+            var boards = await _sut.GetBoardsAsync(paginationFilter);
 
             // Assert
             Assert.Equal(boardList.Count, boards.Count);

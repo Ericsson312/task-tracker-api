@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TaskTrackerApi.Data;
@@ -16,12 +17,17 @@ namespace TaskTrackerApi.Repositories
             _dataContext = dataContext;
         }
 
-        public async Task<List<Board>> GetBoardsAsync()
+        public async Task<List<Board>> GetBoardsAsync(PaginationFilter paginationFilter)
         {
+            // calculate the amount of pages that needs to be skipped
+            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+            
             return await _dataContext.Boards
                 .Include(m => m.Members)
                 .Include(c => c.Cards)
                 .ThenInclude(card => card.Tags)
+                .Skip(skip)
+                .Take(paginationFilter.PageSize)
                 .AsNoTracking()
                 .ToListAsync();
         }

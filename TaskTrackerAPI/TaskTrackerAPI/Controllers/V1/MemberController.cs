@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using TaskTrackerApi.Contracts.V1;
 using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
+using TaskTrackerApi.Domain;
+using TaskTrackerApi.Examples.V1.Requests.Queries;
 using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
 using TaskTrackerApi.Services;
@@ -31,15 +33,33 @@ namespace TaskTrackerApi.Controllers.V1
         /// <response code="200">Returns all the members in the system</response>
         [HttpGet(ApiRoutes.Members.GetAll)]
         [ProducesResponseType(typeof(MemberResponse), 200)]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync([FromQuery] PaginationQuery paginationQuery)
         {
-            var members = await _boardService.GetMembersAsync();
+            var pageNumber = paginationQuery.PageNumber;
+            var pageSize = paginationQuery.PageSize;
+            
+            var filter = new PaginationFilter
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+            
+            var members = await _boardService.GetMembersAsync(filter);
+            
             var memberResponse = members.Select(x => new MemberResponse
             {
                 Email = x.Email
             }).ToList();
+            
+            var pagedResponse = new PagedResponse<MemberResponse>
+            {
+                Data = memberResponse,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                ElementsCont = members.Count
+            };
 
-            return Ok(new Response<List<MemberResponse>>(memberResponse));
+            return Ok(pagedResponse);
         }
         
         /// <summary>

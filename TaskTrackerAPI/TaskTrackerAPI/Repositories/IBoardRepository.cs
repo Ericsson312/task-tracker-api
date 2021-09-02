@@ -9,7 +9,7 @@ namespace TaskTrackerApi.Repositories
     {
         Task<Board> GetBoardByIdAsync(Guid boardId);
         Task<Board> GetBoardByCardIdAsync(Guid cardId);
-        Task<List<Board>> GetBoardsAsync();
+        Task<List<Board>> GetBoardsAsync(PaginationFilter paginationFilter);
         Task<bool> CreateBoardAsync(Board board);
         Task<bool> UpdateBoardAsync(Board board);
         Task<bool> DeleteBoardAsync(Board board);

@@ -25,9 +25,9 @@ namespace TaskTrackerApi.Services
 
         #region Board service
 
-         public async Task<List<Board>> GetBoardsAsync()
+         public async Task<List<Board>> GetBoardsAsync(PaginationFilter paginationFilter)
          {
-             return await _boardRepository.GetBoardsAsync();
+             return await _boardRepository.GetBoardsAsync(paginationFilter);
          }
 
          public async Task<Board> GetBoardByIdAsync(Guid boardId)
@@ -92,9 +92,9 @@ namespace TaskTrackerApi.Services
 
         #region Member service
 
-        public async Task<List<Member>> GetMembersAsync()
+        public async Task<List<Member>> GetMembersAsync(PaginationFilter paginationFilter)
         {
-            return await _memberRepository.GetMembersAsync();
+            return await _memberRepository.GetMembersAsync(paginationFilter);
         }
 
         public async Task<Member> GetMemberAsync(string email)
@@ -144,9 +144,9 @@ namespace TaskTrackerApi.Services
         
         #region Card service
         
-        public async Task<List<Card>> GetCardsAsync()
+        public async Task<List<Card>> GetCardsAsync(PaginationFilter paginationFilter)
         {
-            return await _cardRepository.GetCardsAsync();
+            return await _cardRepository.GetCardsAsync(paginationFilter);
         }
 
         public async Task<Card> GetCardByIdAsync(Guid cardId)
@@ -193,9 +193,9 @@ namespace TaskTrackerApi.Services
 
         #region Tag service
         
-        public async Task<List<Tag>> GetTagsAsync()
+        public async Task<List<Tag>> GetTagsAsync(PaginationFilter paginationFilter)
         {
-            return await _tagRepository.GetTagsAsync();
+            return await _tagRepository.GetTagsAsync(paginationFilter);
         }
 
         public async Task<Tag> GetTagByNameAsync(string tagName)

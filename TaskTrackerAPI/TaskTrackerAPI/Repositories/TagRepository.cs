@@ -16,9 +16,16 @@ namespace TaskTrackerApi.Repositories
             _dataContext = dataContext;
         }
         
-        public async Task<List<Tag>> GetTagsAsync()
+        public async Task<List<Tag>> GetTagsAsync(PaginationFilter paginationFilter)
         {
-            return await _dataContext.Tags.AsNoTracking().ToListAsync();
+            // calculate the amount of pages that needs to be skipped
+            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+            
+            return await _dataContext.Tags
+                .Skip(skip)
+                .Take(paginationFilter.PageSize)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<Tag> GetTagByNameAsync(string tagName)

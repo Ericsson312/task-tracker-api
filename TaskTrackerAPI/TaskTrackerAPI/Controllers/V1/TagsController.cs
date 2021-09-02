@@ -10,6 +10,7 @@ using TaskTrackerApi.Contracts.V1;
 using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Domain;
+using TaskTrackerApi.Examples.V1.Requests.Queries;
 using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
 using TaskTrackerApi.Repositories;
@@ -34,15 +35,33 @@ namespace TaskTrackerApi.Controllers.V1
         [HttpGet(ApiRoutes.Tags.GetAll)]
         [ProducesResponseType(typeof(TagResponse), 200)]
         [Cached(600)]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync([FromQuery] PaginationQuery paginationQuery)
         {
-            var tags = await _taskService.GetTagsAsync();
+            var pageNumber = paginationQuery.PageNumber;
+            var pageSize = paginationQuery.PageSize;
+            
+            var filter = new PaginationFilter
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+            
+            var tags = await _taskService.GetTagsAsync(filter);
+            
             var tagResponses = tags.Select(x => new TagResponse
             {
                 Name = x.Name
             }).ToList();
+            
+            var pagedResponse = new PagedResponse<TagResponse>
+            {
+                Data = tagResponses,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                ElementsCont = tags.Count
+            };
 
-            return Ok(new Response<List<TagResponse>>(tagResponses));
+            return Ok(pagedResponse);
         }
 
         /// <summary>

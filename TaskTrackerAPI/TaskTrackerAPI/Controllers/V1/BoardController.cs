@@ -9,6 +9,7 @@ using TaskTrackerApi.Contracts.V1;
 using TaskTrackerApi.Contracts.V1.Requests;
 using TaskTrackerApi.Contracts.V1.Responses;
 using TaskTrackerApi.Domain;
+using TaskTrackerApi.Examples.V1.Requests.Queries;
 using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
 using TaskTrackerApi.Services;
@@ -34,9 +35,18 @@ namespace TaskTrackerApi.Controllers.V1
         //[Authorize(Roles = "Admin")]
         //[Authorize(Roles = "Moderator")]
         [ProducesResponseType(typeof(BoardResponse), 200)]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAllAsync([FromQuery] PaginationQuery paginationQuery)
         {
-            var boards =  await _boardService.GetBoardsAsync();
+            var pageNumber = paginationQuery.PageNumber;
+            var pageSize = paginationQuery.PageSize;
+            
+            var filter = new PaginationFilter
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+            
+            var boards =  await _boardService.GetBoardsAsync(filter);
             
             var boardResponses = new List<BoardResponse>();
 
@@ -58,8 +68,16 @@ namespace TaskTrackerApi.Controllers.V1
                     Members = board.Members?.Select(x => new MemberResponse{ Email = x.MemberEmail }).ToList()
                 });
             }
+            
+            var pagedResponse = new PagedResponse<BoardResponse>
+            {
+                Data = boardResponses,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                ElementsCont = boardResponses.Count
+            };
 
-            return Ok(new Response<List<BoardResponse>>(boardResponses));
+            return Ok(pagedResponse);
         }
         
         /// <summary>

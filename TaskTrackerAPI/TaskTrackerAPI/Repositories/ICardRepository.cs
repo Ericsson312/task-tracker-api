@@ -8,6 +8,7 @@ namespace TaskTrackerApi.Repositories
     public interface ICardRepository
     {
         Task<List<Card>> GetCardsAsync();
+        Task<List<Card>> GetCardsAsync(PaginationFilter paginationFilter);
         Task<Card> GetCardByIdAsync(Guid cardId);
         Task<bool> CreateCardAsync(Card card);
         Task<bool> UpdateCardAsync(Card card);

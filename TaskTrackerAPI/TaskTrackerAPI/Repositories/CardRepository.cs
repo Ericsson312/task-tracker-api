@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TaskTrackerApi.Data;
@@ -20,6 +21,19 @@ namespace TaskTrackerApi.Repositories
         {
             return await _dataContext.Cards
                 .Include(x => x.Tags)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        
+        public async Task<List<Card>> GetCardsAsync(PaginationFilter paginationFilter)
+        {
+            // calculate the amount of pages that needs to be skipped
+            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+            
+            return await _dataContext.Cards
+                .Include(x => x.Tags)
+                .Skip(skip)
+                .Take(paginationFilter.PageSize)
                 .AsNoTracking()
                 .ToListAsync();
         }

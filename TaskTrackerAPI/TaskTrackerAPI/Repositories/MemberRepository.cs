@@ -16,9 +16,16 @@ namespace TaskTrackerApi.Repositories
             _dataContext = dataContext;
         }
         
-        public async Task<List<Member>> GetMembersAsync()
+        public async Task<List<Member>> GetMembersAsync(PaginationFilter paginationFilter)
         {
-            return await _dataContext.Members.AsNoTracking().ToListAsync();
+            // calculate the amount of pages that needs to be skipped
+            var skip = (paginationFilter.PageNumber - 1) * paginationFilter.PageSize;
+            
+            return await _dataContext.Members
+                .Skip(skip)
+                .Take(paginationFilter.PageSize)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<Member> GetMemberAsync(string email)
