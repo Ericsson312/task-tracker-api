@@ -12,6 +12,7 @@ using TaskTrackerApi.Domain;
 using TaskTrackerApi.Examples.V1.Requests.Queries;
 using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
+using TaskTrackerApi.Helpers;
 using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Controllers.V1
@@ -21,10 +22,12 @@ namespace TaskTrackerApi.Controllers.V1
     public class CardController : Controller
     {
         private readonly IBoardService _boardService;
+        private readonly IUriService _uriService;
         
-        public CardController(IBoardService boardService)
+        public CardController(IBoardService boardService, IUriService uriService)
         {
             _boardService = boardService;
+            _uriService = uriService;
         }
 
         /// <summary>
@@ -46,7 +49,7 @@ namespace TaskTrackerApi.Controllers.V1
 
             var cards = await _boardService.GetCardsAsync(filter);
             
-            var cardResponses = cards.Select(x => new CardResponse
+            var cardResponse = cards.Select(x => new CardResponse
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -54,15 +57,17 @@ namespace TaskTrackerApi.Controllers.V1
                 Tags = x.Tags.Select(xx => new TagResponse { Name = xx.TagName }).ToList()
             }).ToList();
 
-            var pagedResponse = new PagedResponse<CardResponse>
-            {
-                Data = cardResponses,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                ElementsCont = cards.Count
-            };
+            var paginationResponse = PaginationHelpers.CreatePaginationResponse(_uriService, filter, cardResponse);
+            
+            // var pagedResponse = new PagedResponse<CardResponse>
+            // {
+            //     Data = cardResponse,
+            //     PageNumber = pageNumber,
+            //     PageSize = pageSize,
+            //     ElementsCont = cards.Count
+            // };
 
-            return Ok(pagedResponse);
+            return Ok(paginationResponse);
         }
 
         /// <summary>
@@ -136,9 +141,11 @@ namespace TaskTrackerApi.Controllers.V1
 
             await _boardService.CreateCardAsync(card);
 
-            var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
-            var location = $"{baseUrl}/{ApiRoutes.Cards.Get.Replace("{cardId}", card.Id.ToString())}";
+            //var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
+            //var location = $"{baseUrl}/{ApiRoutes.Cards.Get.Replace("{cardId}", card.Id.ToString())}";
 
+            var locationUri = _uriService.GetCardUri(card.Id.ToString());
+            
             var response = new CardResponse 
             { 
                 Id = card.Id,
@@ -147,7 +154,7 @@ namespace TaskTrackerApi.Controllers.V1
                 Tags = card.Tags?.Select(x => new TagResponse { Name = x.TagName }).ToList()
             };
 
-            return Created(location, new Response<CardResponse>(response));
+            return Created(locationUri, new Response<CardResponse>(response));
         }
         
         /// <summary>

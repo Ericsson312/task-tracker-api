@@ -12,6 +12,7 @@ using TaskTrackerApi.Domain;
 using TaskTrackerApi.Examples.V1.Requests.Queries;
 using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
+using TaskTrackerApi.Helpers;
 using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Controllers.V1
@@ -21,10 +22,12 @@ namespace TaskTrackerApi.Controllers.V1
     public class BoardController : Controller
     {
         private readonly IBoardService _boardService;
+        private readonly IUriService _uriService;
         
-        public BoardController(IBoardService boardService)
+        public BoardController(IBoardService boardService, IUriService uriService)
         {
             _boardService = boardService;
+            _uriService = uriService;
         }
         
         /// <summary>
@@ -48,11 +51,11 @@ namespace TaskTrackerApi.Controllers.V1
             
             var boards =  await _boardService.GetBoardsAsync(filter);
             
-            var boardResponses = new List<BoardResponse>();
+            var boardResponse = new List<BoardResponse>();
 
             foreach (var board in boards)
             {
-                boardResponses.Add(new BoardResponse
+                boardResponse.Add(new BoardResponse
                 {
                     Id = board.Id,
                     UserId = board.UserId,
@@ -69,15 +72,17 @@ namespace TaskTrackerApi.Controllers.V1
                 });
             }
             
-            var pagedResponse = new PagedResponse<BoardResponse>
-            {
-                Data = boardResponses,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                ElementsCont = boardResponses.Count
-            };
+            var paginationResponse = PaginationHelpers.CreatePaginationResponse(_uriService, filter, boardResponse);
+            
+            // var pagedResponse = new PagedResponse<BoardResponse>
+            // {
+            //     Data = boardResponse,
+            //     PageNumber = pageNumber,
+            //     PageSize = pageSize,
+            //     ElementsCont = boardResponse.Count
+            // };
 
-            return Ok(pagedResponse);
+            return Ok(paginationResponse);
         }
         
         /// <summary>
@@ -210,9 +215,11 @@ namespace TaskTrackerApi.Controllers.V1
 
             await _boardService.CreateBoardAsync(board);
 
-            var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
-            var location = $"{baseUrl}/{ApiRoutes.Boards.Get.Replace("{boardId}", board.Id.ToString())}";
+            // var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
+            // var location = $"{baseUrl}/{ApiRoutes.Boards.Get.Replace("{boardId}", board.Id.ToString())}";
             
+            var locationUri = _uriService.GetBoardUri(board.Id.ToString());
+
             var response = new BoardResponse 
             { 
                 Id = board.Id,
@@ -223,7 +230,7 @@ namespace TaskTrackerApi.Controllers.V1
                 Members = board.Members.Select(x => new MemberResponse{ Email = x.MemberEmail })
             };
             
-            return Created(location, new Response<BoardResponse>(response));
+            return Created(locationUri, new Response<BoardResponse>(response));
         }
         
         /// <summary>

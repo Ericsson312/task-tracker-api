@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using TaskTrackerApi.Authorization;
 using TaskTrackerApi.Filters;
 using TaskTrackerApi.Options;
@@ -69,6 +70,14 @@ namespace TaskTrackerApi.Installers
             });
 
             services.AddSingleton<IAuthorizationHandler, WorksForCompanyHandler>();
+
+            services.AddScoped<IUriService>(provider =>
+            {
+                var accessor = provider.GetRequiredService<IHttpContextAccessor>();
+                var request = accessor.HttpContext.Request;
+                var absoluteUri = string.Concat(request.Scheme, "://", request.Host.ToUriComponent(), request.Path.Value);
+                return new UriService(absoluteUri);
+            });
         }
     }
 }

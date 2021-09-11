@@ -12,6 +12,7 @@ using TaskTrackerApi.Domain;
 using TaskTrackerApi.Examples.V1.Requests.Queries;
 using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
+using TaskTrackerApi.Helpers;
 using TaskTrackerApi.Services;
 
 namespace TaskTrackerApi.Controllers.V1
@@ -21,10 +22,12 @@ namespace TaskTrackerApi.Controllers.V1
     public class MemberController : Controller
     {
         private readonly IBoardService _boardService;
+        private readonly IUriService _uriService;
 
-        public MemberController(IBoardService boardService)
+        public MemberController(IBoardService boardService, IUriService uriService)
         {
             _boardService = boardService;
+            _uriService = uriService;
         }
 
         /// <summary>
@@ -51,15 +54,17 @@ namespace TaskTrackerApi.Controllers.V1
                 Email = x.Email
             }).ToList();
             
-            var pagedResponse = new PagedResponse<MemberResponse>
-            {
-                Data = memberResponse,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                ElementsCont = members.Count
-            };
+            var paginationResponse = PaginationHelpers.CreatePaginationResponse(_uriService, filter, memberResponse);
+            
+            // var pagedResponse = new PagedResponse<MemberResponse>
+            // {
+            //     Data = memberResponse,
+            //     PageNumber = pageNumber,
+            //     PageSize = pageSize,
+            //     ElementsCont = members.Count
+            // };
 
-            return Ok(pagedResponse);
+            return Ok(paginationResponse);
         }
         
         /// <summary>

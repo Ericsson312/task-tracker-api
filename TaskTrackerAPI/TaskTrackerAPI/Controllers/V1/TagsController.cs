@@ -13,6 +13,7 @@ using TaskTrackerApi.Domain;
 using TaskTrackerApi.Examples.V1.Requests.Queries;
 using TaskTrackerApi.Examples.V1.Responses;
 using TaskTrackerApi.Extensions;
+using TaskTrackerApi.Helpers;
 using TaskTrackerApi.Repositories;
 using TaskTrackerApi.Services;
 
@@ -23,9 +24,12 @@ namespace TaskTrackerApi.Controllers.V1
     public class TagsController : Controller
     {
         private readonly IBoardService _taskService;
-        public TagsController(IBoardService taskService)
+        private readonly IUriService _uriService;
+        
+        public TagsController(IBoardService taskService, IUriService uriService)
         {
             _taskService = taskService;
+            _uriService = uriService;
         }
 
         /// <summary>
@@ -53,15 +57,17 @@ namespace TaskTrackerApi.Controllers.V1
                 Name = x.Name
             }).ToList();
             
-            var pagedResponse = new PagedResponse<TagResponse>
-            {
-                Data = tagResponses,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                ElementsCont = tags.Count
-            };
+            var paginationResponse = PaginationHelpers.CreatePaginationResponse(_uriService, filter, tagResponses);
+            
+            // var pagedResponse = new PagedResponse<TagResponse>
+            // {
+            //     Data = tagResponses,
+            //     PageNumber = pageNumber,
+            //     PageSize = pageSize,
+            //     ElementsCont = tags.Count
+            // };
 
-            return Ok(pagedResponse);
+            return Ok(paginationResponse);
         }
 
         /// <summary>
@@ -111,12 +117,14 @@ namespace TaskTrackerApi.Controllers.V1
                 return BadRequest(new ErrorResponse{ Errors = new List<ErrorModel>{ new ErrorModel{ Message = "Unable to create tag" } }});
             }
 
-            var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
-            var location = $"{baseUrl}/{ApiRoutes.Tags.Get.Replace("{tagName}", newTag.Name)}";
+            // var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
+            // var location = $"{baseUrl}/{ApiRoutes.Tags.Get.Replace("{tagName}", newTag.Name)}";
+            
+            var locationUri = _uriService.GetTagUri(newTag.Name);
 
             var response = new TagResponse { Name = newTag.Name };
 
-            return Created(location, new Response<TagResponse>(response));
+            return Created(locationUri, new Response<TagResponse>(response));
         }
 
         /// <summary>
